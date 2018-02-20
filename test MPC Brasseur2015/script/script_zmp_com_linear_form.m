@@ -4,15 +4,15 @@
 %x0_k=[x(kT);dx(kT);ddx(kT)]
 %dddX_k=[dddx_k; ... ;dddx_k+N-1]
 
-Px_z=zeros(N,3);
+Px_z_noheight=zeros(N,3);
 for i=1:N
-    Px_z(i,1:3)=[1 i*T i^2*T^2/2];%-[0 0 h_com/g];
+    Px_z_noheight(i,1:3)=[1 i*T i^2*T^2/2];%-h_com/g];
 end
 
-Pu_z=zeros(N,N);
+Pu_z_noheight=zeros(N,N);
 for i=1:N
     for j=1:i
-       Pu_z(i,j)=T^3/6+(i-j)*T^3/2+T*(+1/2*(i-j)^2*T^2);%-T*h_com/g; 
+       Pu_z_noheight(i,j)=T^3/6+(i-j)*T^3/2+T*(1/2*(i-j)^2*T^2); %-T*h_com/g
     end
 end
 
@@ -43,7 +43,7 @@ for i=1:N
     end
 end
 
-% COM velocity
+% COM acceleration
 Px_ddc=[zeros(N,2) ones(N,1)];
 
-Pu_ddc=tril(ones(N,N))*T;
+Pu_ddc=tril(ones(N))*T;

@@ -44,5 +44,5 @@ phase_duration_start=2.4;
 phase_duration_stop=2.4;
 
 %% COM height limits to the floor
-h_com_max=+0.2;
-h_com_min=-0.2;
+h_com_max=+0.05;
+h_com_min=-0.01;
