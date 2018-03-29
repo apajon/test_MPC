@@ -399,8 +399,11 @@ for i=1:round(max(phase_duration_cumul)/T)
 %         plot(26+16:26+6+16,repmat(QP_result(18)+inttoankle,7,1),'--k')
 %         plot(26+16:26+6+16,repmat(QP_result(18)-exttoankle,7,1),'--k')
 %     end
+
+    plot([1:i+1]*T,yc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*ydc(1:i+1),'-*b')
+
     hold off
-    legend('CoP','COM','COM preview','CoP up','CoP down','Location','southeast')
+    legend('CoP','COM','COM preview','CoP up','CoP down','Capture point','Location','southeast')
     
     figure(2)
     clf
@@ -417,42 +420,84 @@ for i=1:round(max(phase_duration_cumul)/T)
     plot([1:i+1]*T,1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_min)/g*xddc(1:i+1),'-*m')
     
 %     plot(1:i+N,0.2*(1:i+N)*T)
+
+    plot([1:i+1]*T,xc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*xdc(1:i+1),'-*b')
+
     hold off
-    legend('CoP','COM','COM preview','CoP up','CoP down','Location','southeast')
+    legend('CoP','COM','COM preview','CoP up','CoP down','Capture point','Location','southeast')
     
-    figure(3)
-    clf
-    title('trajectories along z')
-    xlabel('t [s]') % x-axis label
-    ylabel('z [m]') % y-axis label
-    axis
-    hold on
-    plot([1:i+1]*T,zc(1:i+1),'-*k')
-    plot(((1:N)+i)*T,Px_c*[zc(i);zdc(i);zddc(i)]+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+N),'b') 
-    hold off
-    legend('COM','COM preview','Location','southeast')
+    display=false;
+    
+    if display
+        figure(3)
+        clf
+        title('trajectories along z')
+        xlabel('t [s]') % x-axis label
+        ylabel('z [m]') % y-axis label
+        axis
+        hold on
+        plot([1:i+1]*T,zc(1:i+1),'-*k')
+        plot(((1:N)+i)*T,Px_c*[zc(i);zdc(i);zddc(i)]+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+N),'b') 
+        hold off
+        legend('COM','COM preview','Location','southeast')
+
+
+        figure(4)
+        clf
+        title('trajectory of COM on sagittal plane')
+        xlabel('x [m]') % x-axis label
+        ylabel('z [m]') % y-axis label
+        legend('Location','southeast')
+        hold on
+        plot(xc(1:i+1),zc(1:i+1),'-*k')
+        hold off
+
+        figure(5)
+        clf
+        title('trajectories of COM on lateral plane')
+        xlabel('y [m]') % x-axis label
+        ylabel('z [m]') % y-axis label
+        legend('Location','southeast')
+        hold on
+        plot(yc(1:i+1),zc(1:i+1),'-*k')
+        hold off
+    end
 
     
-    figure(4)
+    figure(6)
     clf
-    title('trajectory of COM on sagittal plane')
+    title('trajectories along y')
     xlabel('x [m]') % x-axis label
-    ylabel('z [m]') % y-axis label
-    legend('Location','southeast')
+    ylabel('y [m]') % y-axis label
     hold on
-    plot(xc(1:i+1),zc(1:i+1),'-*k')
+    plot(1*xc(1:i+1)+0*xdc(1:i+1)-zc(1:i+1)./(zddc(1:i+1)+g).*xddc(1:i+1),1*yc(1:i+1)+0*ydc(1:i+1)-zc(1:i+1)./(zddc(1:i+1)+g).*yddc(1:i+1),'-*g')
+    plot(xc(1:i+1),yc(1:i+1),'-*k')
+    plot(Px_c*[xc(i);xdc(i);xddc(i)]+Pu_c*QP_result(1:N),Px_c*[yc(i);ydc(i);yddc(i)]+Pu_c*QP_result(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),'b') 
+
+    plot(1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_max)/g*xddc(1:i+1),1*yc(1:i+1)+0*ydc(1:i+1)-zeta_up_ref(1)*yddc(1:i+1),'-*r')
+    plot(1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_min)/g*xddc(1:i+1),1*yc(1:i+1)+0*ydc(1:i+1)-zeta_down_ref(1)*yddc(1:i+1),'-*m')
+
+    plot(xc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*xdc(1:i+1),yc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*ydc(1:i+1),'-*b')
+
+    hold off
+    legend('CoP','COM','COM preview','CoP up','CoP down','Capture point','Location','southeast')
+       
+    hold on;
+    pstep=[xstep ystep];
+    psi=zeros(size(pstep,1)*3,1);
+    firstSS=(phase_type(2)=='r');
+    
+    XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
+    for i=1:length(pstep)
+        plot(XY(i,1:5),XY(i,6:10),'-k','LineWidth',2)
+    end
+
+    XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_margin,exttoankle-sole_margin,inttoankle-sole_margin,firstSS);
+    for i=1:length(pstep)
+        plot(XY(i,1:5),XY(i,6:10),':k','LineWidth',2)
+    end
     hold off
     
-    figure(5)
-    clf
-    title('trajectories of COM on lateral plane')
-    xlabel('x [m]') % x-axis label
-    ylabel('z [m]') % y-axis label
-    legend('Location','southeast')
-    hold on
-    plot(yc(1:i+1),zc(1:i+1),'-*k')
-    hold off
-
 end
 toc
 
