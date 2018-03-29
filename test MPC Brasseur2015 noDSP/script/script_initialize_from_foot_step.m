@@ -35,3 +35,6 @@
         xf_step=Px_step*xstep(end-1:end,1);
         yf_step=Px_step*ystep(end-1:end,1);
     end
+    
+%% Foot step height ref
+    zstep_ref_reduce=zzmp_ref(1+(i-1):N+(i-1),:);

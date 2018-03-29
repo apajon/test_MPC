@@ -35,15 +35,17 @@ if isempty(Pu_step)
     zf_c=Px_c*[zc(i);zdc(i);zddc(i)];
 
     zzmp_ref_reduce=zzmp_ref(1+(i-1):N+(i-1),:);
-    if i<10
-        hcom_ref_reduce=0.8;
-    elseif i<120
-        hcom_ref_reduce=0.95;%h_com+h_com_max;%hcom_ref(1+(i-1):N+(i-1),:);
-    else
-        hcom_ref_reduce=0.8;
-    end
+    hcom_ref_reduce=hcom_ref(1+(i-1):N+(i-1),:);
+    hcom_ref_max_reduce=hcom_ref_max(1+(i-1):N+(i-1),:);
+%     if i<10
+%         hcom_ref_reduce=0.8;
+%     elseif i<120
+%         hcom_ref_reduce=0.95;%h_com+h_com_max;%hcom_ref(1+(i-1):N+(i-1),:);
+%     else
+%         hcom_ref_reduce=0.8;
+%     end
 
-    zf=w4*Pu_c.'*(zf_c-zzmp_ref_reduce-hcom_ref_reduce);
+    zf=w4*Pu_c.'*(zf_c-zzmp_ref_reduce-hcom_ref_max_reduce);
 
     H=blkdiag(H,w4*H_c+w1*H_dddc); % add min jerk
     f=[f;zf];

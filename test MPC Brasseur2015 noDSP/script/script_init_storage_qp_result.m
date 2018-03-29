@@ -35,6 +35,7 @@ zddc(1)=zcom_0(3);
 
 xstep=[xstep_l_0;xstep_r_0];
 ystep=[ystep_l_0;ystep_r_0];
+zstep=[zstep_l_0;zstep_r_0];
 
 % Capture point
 xcapture=zeros(N+1,1);

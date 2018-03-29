@@ -45,7 +45,7 @@ H_Pu=w1*H_dddc+w2*H_dc;
 %% Optimization problem QP
 % Sampling update
 tic
-for i=1:round(max(phase_duration_cumul)/T)-1
+for i=1:round(max(phase_duration_cumul)/T)
     i
     %% Initialization from last robot COM state
     run('script/script_initialize_from_com_state.m')
@@ -94,19 +94,19 @@ for i=1:round(max(phase_duration_cumul)/T)-1
     end
         
     
-    xb_zmp=[no_double_support(no_double_support)*fronttoankle;...
-        no_double_support(no_double_support)*backtoankle;...
-        no_double_support(no_double_support)*fronttoankle;...
-        no_double_support(no_double_support)*backtoankle]...
+    xb_zmp=[no_double_support(no_double_support)*(fronttoankle-sole_margin);...
+        no_double_support(no_double_support)*(backtoankle-sole_margin);...
+        no_double_support(no_double_support)*(fronttoankle-sole_margin);...
+        no_double_support(no_double_support)*(backtoankle-sole_margin)]...
         +[xf_step(no_double_support,:)-xf_z_up(no_double_support,:);...
         -xf_step(no_double_support,:)+xf_z_up(no_double_support,:);...
         xf_step(no_double_support,:)-xf_z_down(no_double_support,:);...
         -xf_step(no_double_support,:)+xf_z_down(no_double_support,:)];
     
-    yb_zmp=[right_support(no_double_support)*inttoankle+left_support(no_double_support)*exttoankle;...
-        right_support(no_double_support)*exttoankle+left_support(no_double_support)*inttoankle;...
-        right_support(no_double_support)*inttoankle+left_support(no_double_support)*exttoankle;...
-        right_support(no_double_support)*exttoankle+left_support(no_double_support)*inttoankle]...
+    yb_zmp=[right_support(no_double_support)*(inttoankle-sole_margin)+left_support(no_double_support)*(exttoankle-sole_margin);...
+        right_support(no_double_support)*(exttoankle-sole_margin)+left_support(no_double_support)*(inttoankle-sole_margin);...
+        right_support(no_double_support)*(inttoankle-sole_margin)+left_support(no_double_support)*(exttoankle-sole_margin);...
+        right_support(no_double_support)*(exttoankle-sole_margin)+left_support(no_double_support)*(inttoankle-sole_margin)]...
         +[yf_step(no_double_support,:)-yf_z_up(no_double_support,:);...
         -yf_step(no_double_support,:)+yf_z_up(no_double_support,:);...
         yf_step(no_double_support,:)-yf_z_down(no_double_support,:);...
@@ -271,9 +271,10 @@ for i=1:round(max(phase_duration_cumul)/T)-1
     if phase_type_sampling_reduce(1)~='b' && phase_type_sampling_reduce(2)=='b'
         xstep=[xstep;QP_result(17)];
         ystep=[ystep;QP_result(size(A_zmp,2)/2+17)];
+        zstep=[zstep;zzmp_ref_reduce(3)];
     end
     %%
-    if true
+    if false
         %% Display
         figure(1)
         clf
@@ -393,16 +394,15 @@ for i=1:round(max(phase_duration_cumul)/T)-1
         firstSS=(phase_type(2)=='r');
 
         XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
-        for i=1:length(pstep)
-            plot(XY(i,1:5),XY(i,6:10),'-k','LineWidth',2)
+        for j=1:length(pstep)
+            plot(XY(j,1:5),XY(j,6:10),'-k','LineWidth',2)
         end
 
         XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_margin,exttoankle-sole_margin,inttoankle-sole_margin,firstSS);
-        for i=1:length(pstep)
-            plot(XY(i,1:5),XY(i,6:10),':k','LineWidth',2)
+        for j=1:length(pstep)
+            plot(XY(j,1:5),XY(j,6:10),':k','LineWidth',2)
         end
         hold off
-    end
 %     figure(3)
 %             clf
 %             title('trajectories along z')
@@ -421,11 +421,219 @@ for i=1:round(max(phase_duration_cumul)/T)-1
 %             plot(zeta_up_ref,'r')
 %             plot(zeta_down_ref,'m')
 %             hold off
+        figure(6)
+        clf
+        title('trajectories along y')
+        xlabel('x [m]') % x-axis label
+        ylabel('y [m]') % y-axis label
+        zlabel('z [m]') % z-axis label
+        view(3)
+        axis([-0.5 4 -2.25 2.25 -inf 1])
+        hold on
+        plot3(1*xc(1:i+1)+0*xdc(1:i+1)-zc(1:i+1)./(zddc(1:i+1)+g).*xddc(1:i+1),...
+            1*yc(1:i+1)+0*ydc(1:i+1)-zc(1:i+1)./(zddc(1:i+1)+g).*yddc(1:i+1),...
+            [zzmp_ref(1);zzmp_ref(1:i)],...
+            '-*g')
+        plot3(xc(1:i+1),yc(1:i+1),zc(1:i+1),'-*k')
+        plot3(Px_c*[xc(i);xdc(i);xddc(i)]+Pu_c*QP_result(1:N),...
+            Px_c*[yc(i);ydc(i);yddc(i)]+Pu_c*QP_result(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),...
+            Px_c*[zc(i);zdc(i);zddc(i)]+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+N),...
+            'b') 
+
+        plot3(1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_max)/g*xddc(1:i+1),...
+            1*yc(1:i+1)+0*ydc(1:i+1)-zeta_up_ref(1)*yddc(1:i+1),...
+            [zzmp_ref(1);zzmp_ref(1:i)],...
+            '-*r')
+        plot3(1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_min)/g*xddc(1:i+1),...
+            1*yc(1:i+1)+0*ydc(1:i+1)-zeta_down_ref(1)*yddc(1:i+1),...
+            [zzmp_ref(1);zzmp_ref(1:i)],...
+            '-*m')
+
+        plot3(xc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*xdc(1:i+1),...
+            yc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*ydc(1:i+1),...
+            [zzmp_ref(1);zzmp_ref(1:i)],...
+            '-*b')
+
+        hold off
+        legend('CoP','COM','COM preview','CoP up','CoP down','Capture point','Location','southeast')
+
+        hold on;
+        pstep=[xstep ystep];
+        psi=zeros(size(pstep,1)*3,1);
+        firstSS=(phase_type(2)=='r');
+
+        XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
+        for j=1:length(pstep)
+            plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),'-k','LineWidth',2)
+        end
+
+        XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_margin,exttoankle-sole_margin,inttoankle-sole_margin,firstSS);
+        for j=1:length(pstep)
+            plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),':k','LineWidth',2)
+        end
+        
+        XY=drawing_rectangle_rotate(pstep,psi,backtoankle+sole_margin,fronttoankle+sole_margin,exttoankle+sole_margin,inttoankle+sole_margin,firstSS);
+        for j=1:length(pstep)
+            fill3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),[132,200,225]/255,'LineStyle','none')
+        end
+        hold off
+    end
+        
+%         figure(7)
+%         clf
+% 
+%         ax1 = subplot(2,1,1);
+%         title('trajectories 3d')
+%         xlabel('x [m]') % x-axis label
+%         ylabel('y [m]') % y-axis label
+%         zlabel('z [m]') % z-axis label
+%         view(3)
+%         hold on
+%         plot3(xc(1:i+1),yc(1:i+1),zc(1:i+1),'-*k')
+%         plot3(Px_c*[xc(i);xdc(i);xddc(i)]+Pu_c*QP_result(1:N),...
+%             Px_c*[yc(i);ydc(i);yddc(i)]+Pu_c*QP_result(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),...
+%             Px_c*[zc(i);zdc(i);zddc(i)]+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+N),...
+%             'b')
+%         hold off
+% 
+%         ax2 = subplot(2,1,2);
+%         title('trajectories 3d')
+%         xlabel('x [m]') % x-axis label
+%         ylabel('y [m]') % y-axis label
+%         zlabel('z [m]') % z-axis label
+%         view(3)
+%         hold on
+%         plot3(1*xc(1:i+1)+0*xdc(1:i+1)-zc(1:i+1)./(zddc(1:i+1)+g).*xddc(1:i+1),...
+%             1*yc(1:i+1)+0*ydc(1:i+1)-zc(1:i+1)./(zddc(1:i+1)+g).*yddc(1:i+1),...
+%             [zzmp_ref(1);zzmp_ref(1:i)],...
+%             '-*g')
+%         
+%         plot3(1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_max)/g*xddc(1:i+1),...
+%             1*yc(1:i+1)+0*ydc(1:i+1)-zeta_up_ref(1)*yddc(1:i+1),...
+%             [zzmp_ref(1);zzmp_ref(1:i)],...
+%             '-*r')
+%         plot3(1*xc(1:i+1)+0*xdc(1:i+1)-(h_com+h_com_min)/g*xddc(1:i+1),...
+%             1*yc(1:i+1)+0*ydc(1:i+1)-zeta_down_ref(1)*yddc(1:i+1),...
+%             [zzmp_ref(1);zzmp_ref(1:i)],...
+%             '-*m')
+% 
+%         plot3(xc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*xdc(1:i+1),...
+%             yc(1:i+1)+(zc(1:i+1)./(zddc(1:i+1)+g)).^(1/2).*ydc(1:i+1),...
+%             [zzmp_ref(1);zzmp_ref(1:i)],...
+%             '-*b')
+%         hold off
+%         hold on;
+%         pstep=[xstep ystep];
+%         psi=zeros(size(pstep,1)*3,1);
+%         firstSS=(phase_type(2)=='r');
+% 
+%         XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
+%         for j=1:length(pstep)
+%             plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),'-k','LineWidth',2)
+%         end
+% 
+%         XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_margin,exttoankle-sole_margin,inttoankle-sole_margin,firstSS);
+%         for j=1:length(pstep)
+%             plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),':k','LineWidth',2)
+%         end
+%         
+%         XY=drawing_rectangle_rotate(pstep,psi,backtoankle+4*sole_margin,fronttoankle+4*sole_margin,exttoankle+4*sole_margin,inttoankle+4*sole_margin,firstSS);
+%         for j=1:length(pstep)
+%             fill3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),[132,200,225]/255,'LineStyle','none')
+%         end
+%         hold off
+%         hlink = linkprop([ax1,ax2],{'CameraPosition','CameraUpVector'}); 
+%         rotate3d on
+%         
+%         legend('CoP','COM','COM preview','CoP up','CoP down','Capture point','Location','southeast')
+        
 end
 toc
 
-% % Results ZMP
-% xz=1*xc+0*xdc-h_com/g*xddc;
-% yz=1*yc+0*ydc-h_com/g*yddc;
+%% Results ZMP
+zz=[zzmp_ref(1);zzmp_ref(1:end-1)];
+zz(length(zc)+1:end)=[];
+xz=1*xc+0*xdc-(zc-zz)./(zddc+g).*xddc;
+yz=1*yc+0*ydc-(zc-zz)./(zddc+g).*yddc;
+
+zz_up=zz;
+xz_up=1*xc+0*xdc-zeta_up_ref(1:length(zc)).*xddc;
+yz_up=1*yc+0*ydc-zeta_up_ref(1:length(zc)).*yddc;
+
+zz_down=zz;
+xz_down=1*xc+0*xdc-zeta_down_ref(1:length(zc)).*xddc;
+yz_down=1*yc+0*ydc-zeta_down_ref(1:length(zc)).*yddc;
+
+zcapture=zz;
+xcapture=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
+ycapture=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
+
+
 % %% Plot results
 % run('script/script_plot_results.m')
+
+figure(7)
+clf
+
+ax1 = subplot(2,1,1);
+title('trajectory of COM 3d')
+xlabel('x [m]') % x-axis label
+ylabel('y [m]') % y-axis label
+zlabel('z [m]') % z-axis label
+view(3)
+hold on
+plot3(xc,yc,zc,'-*k')
+hold off
+legend('COM','Location','southeast')
+
+ax2 = subplot(2,1,2);
+title('trajectories 3d')
+xlabel('x [m]') % x-axis label
+ylabel('y [m]') % y-axis label
+zlabel('z [m]') % z-axis label
+view(3)
+hold on
+plot3(xz,...
+    yz,...
+    zz,...
+    '-*g')
+
+plot3(xz_up,...
+    yz_up,...
+    zz_up,...
+    '-*r')
+plot3(xz_down,...
+    yz_down,...
+    zz_down,...
+    '-*m')
+
+plot3(xcapture,...
+    ycapture,...
+    zcapture,...
+    '-*b')
+hold off
+hold on;
+pstep=[xstep ystep];
+psi=zeros(size(pstep,1)*3,1);
+firstSS=(phase_type(2)=='r');
+
+XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
+for j=1:length(pstep)
+    plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),'-k','LineWidth',2)
+end
+
+XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_margin,exttoankle-sole_margin,inttoankle-sole_margin,firstSS);
+for j=1:length(pstep)
+    plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),':k','LineWidth',2)
+end
+
+XY=drawing_rectangle_rotate(pstep,psi,backtoankle+4*sole_margin,fronttoankle+4*sole_margin,exttoankle+4*sole_margin,inttoankle+4*sole_margin,firstSS);
+for j=1:length(pstep)
+    fill3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),[132,200,225]/255,'LineStyle','none')
+end
+hold off
+hlink = linkprop([ax1,ax2],{'CameraPosition','CameraUpVector'}); 
+rotate3d on
+
+legend('CoP','CoP up','CoP down','Capture point','Location','southeast')
+
