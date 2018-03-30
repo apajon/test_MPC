@@ -56,190 +56,8 @@ for i=1:round(max(phase_duration_cumul)/T)
     %% Cost
     run('script/script_update_cost.m')
     
-    if i==120
-        i
-    end
-    
-    %% Constraints inequalities
-    %TODO orientation
-    %% Constraint ZMP in convex hull
-%     no_double_support=any(phase_type_sampling_reduce~='b',2);
-    no_double_support=(sum(Px_step_ref==1,2)==1);
-    no_double_support=no_double_support(1+(i-1):N+(i-1),:);
-    if isempty(Pu_step)
-        A_zmp=[Pu_z_up(no_double_support,:);...
-            -Pu_z_up(no_double_support,:);...
-            Pu_z_down(no_double_support,:);...
-            -Pu_z_down(no_double_support,:)];
-    else
-        A_zmp=[Pu_z_up(no_double_support,:) -Pu_step(no_double_support,:);...
-            -Pu_z_up(no_double_support,:) Pu_step(no_double_support,:);...
-            Pu_z_down(no_double_support,:) -Pu_step(no_double_support,:);...
-            -Pu_z_down(no_double_support,:) Pu_step(no_double_support,:)];
-    end
-    
-    A_zmp=blkdiag(A_zmp,A_zmp);
-    
-%     right_support=any(phase_type_sampling_reduce=='r',2);
-%     left_support=any(phase_type_sampling_reduce=='l',2);
-    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-    else
-        right_support=false(size(no_double_support));
-        left_support=false(size(no_double_support));
-    end
-        
-    
-    xb_zmp=[no_double_support(no_double_support)*(fronttoankle-sole_margin);...
-        no_double_support(no_double_support)*(backtoankle-sole_margin);...
-        no_double_support(no_double_support)*(fronttoankle-sole_margin);...
-        no_double_support(no_double_support)*(backtoankle-sole_margin)]...
-        +[xf_step(no_double_support,:)-xf_z_up(no_double_support,:);...
-        -xf_step(no_double_support,:)+xf_z_up(no_double_support,:);...
-        xf_step(no_double_support,:)-xf_z_down(no_double_support,:);...
-        -xf_step(no_double_support,:)+xf_z_down(no_double_support,:)];
-    
-    yb_zmp=[right_support(no_double_support)*(inttoankle-sole_margin)+left_support(no_double_support)*(exttoankle-sole_margin);...
-        right_support(no_double_support)*(exttoankle-sole_margin)+left_support(no_double_support)*(inttoankle-sole_margin);...
-        right_support(no_double_support)*(inttoankle-sole_margin)+left_support(no_double_support)*(exttoankle-sole_margin);...
-        right_support(no_double_support)*(exttoankle-sole_margin)+left_support(no_double_support)*(inttoankle-sole_margin)]...
-        +[yf_step(no_double_support,:)-yf_z_up(no_double_support,:);...
-        -yf_step(no_double_support,:)+yf_z_up(no_double_support,:);...
-        yf_step(no_double_support,:)-yf_z_down(no_double_support,:);...
-        -yf_step(no_double_support,:)+yf_z_down(no_double_support,:)];
-    
-    b_zmp=[xb_zmp;yb_zmp];
-        
-    %% Constraint foot step stretching
-    A_step_stretch=[];
-    b_step_stretch=[];
-    xb_step_stretch=[];yb_step_stretch=[];
-    
-    if size(Pu_step,2)>=1
-        A_step_stretch=eye(size(Pu_step,2));
-        A_step_stretch(2:end,1:end-1)=A_step_stretch(2:end,1:end-1)-eye(size(Pu_step,2)-1);
-        A_step_stretch=[zeros(size(Pu_step,2),N) A_step_stretch];
-        A_step_stretch=[A_step_stretch;-A_step_stretch];
-        
-        A_step_stretch=blkdiag(A_step_stretch,A_step_stretch);
-        
-        %%%
-        phase_type_nodouble_reduce=phase_type_reduce(any(phase_type_reduce~='b',2));
-        
-        if phase_type_reduce(end)=='b' && Pu_step(end,end)==0.5
-            if phase_type_nodouble_reduce(end)=='r'
-                phase_type_nodouble_reduce(end+1)='l';
-            else
-                phase_type_nodouble_reduce(end+1)='r';
-            end
-        end
-        
-        phase_type_nodouble_reduce(1)=[];
-        %%%
-        xb_step_stretch=[ones(size(Pu_step,2),1)*xankmax;...
-            ones(size(Pu_step,2),1)*(-xankmin)];
-        xb_step_stretch([1 end/2+1])=xb_step_stretch([1 end/2+1])+[xstep(end);-xstep(end)];
- 
-        yb_step_stretch=[any(phase_type_nodouble_reduce=='l',2)*yankmax-any(phase_type_nodouble_reduce=='r',2)*yankmin;...
-            any(phase_type_nodouble_reduce=='l',2)*(-yankmin)-any(phase_type_nodouble_reduce=='r',2)*(-yankmax)];
-        yb_step_stretch([1 end/2+1])=yb_step_stretch([1 end/2+1])+[ystep(end);-ystep(end)];
-    end
-    
-    b_step_stretch=[xb_step_stretch;yb_step_stretch];
-    
-    % Constraint concatenation
-    if i>=120
-        A=[A_zmp*0;A_step_stretch];
-        b=[b_zmp*0;b_step_stretch]; 
-    else
-        A=[A_zmp;A_step_stretch];
-        b=[b_zmp;b_step_stretch]; 
-    end
-       
-    
-    A=[A zeros(size(A,1),size(H_c,2))];    
-    %% Constraint vertical com motion
-    %zeta_down (zddc - g) < (zc-zp) < zeta_up (zddc + g)
-    A_verti_motion_up=Pu_c-diag(zeta_up_ref(1+(i-1):N+(i-1),:))*Pu_ddc;
-    b_verti_motion_up=zeta_up_ref(1+(i-1):N+(i-1),:).*g+zzmp_ref_reduce-(zf_c-zeta_up_ref(1+(i-1):N+(i-1),:).*Px_ddc*[zc(i);zdc(i);zddc(i)]);
-
-    A_verti_motion_down=Pu_c-diag(zeta_down_ref(1+(i-1):N+(i-1),:))*Pu_ddc;
-    b_verti_motion_down=zeta_down_ref(1+(i-1):N+(i-1),:).*g+zzmp_ref_reduce-(zf_c-zeta_down_ref(1+(i-1):N+(i-1),:).*Px_ddc*[zc(i);zdc(i);zddc(i)]);
-
-    A_verti_motion=[A_verti_motion_up;-A_verti_motion_down];
-    b_verti_motion=[b_verti_motion_up;-b_verti_motion_down];
-
-    %% COM accel z > -g
-    A_verti_acc=-Pu_ddc;
-    b_verti_acc=g+Px_ddc*[zc(i);zdc(i);zddc(i)];    
-    
-    %%
-    A_verti=[A_verti_motion;A_verti_acc];
-    b_verti=[b_verti_motion;b_verti_acc];
-    
-    A=[A;zeros(size(A_verti,1),size(A_zmp,2)) A_verti];
-    b=[b;b_verti];
-    
-    
-    %% constraint kinematics com height (polyhedron)
-    Pu_diff_c_p=[Pu_c zeros(N,size(Pu_step,2))]-[zeros(N,size(Pu_c,2)) Pu_step];
-    z_Pu_diff_c=Pu_c;
-
-    xf_diff_c_p=Px_c*[xc(i);xdc(i);xddc(i)]-xf_step;
-    yf_diff_c_p=Px_c*[yc(i);ydc(i);yddc(i)]-yf_step;
-    zf_diff_C_p=Px_c*[zc(i);zdc(i);zddc(i)]-zzmp_ref_reduce;
-
-%     A_diff_c_p_no_z=zeros(N*size(rot_successive,1),size(Pu_diff_c_p,2));
-%     zA_diff_c_p=zeros(N*size(rot_successive,1),size(z_Pu_diff_c,2));
-%     xzb_diff_c_p=zeros(N*size(rot_successive,1),1);
-%     yzb_diff_c_p=zeros(N*size(rot_successive,1),1);
-    A_diff_c_p_no_z=[];
-    zA_diff_c_p=[];
-    xzb_diff_c_p=[];
-    yzb_diff_c_p=[];
-    if isempty(z_Pu_diff_c)==0
-        for j=1:size(rot_successive,1)
-            sin_sampled=rot_successive(j,1);
-            cos_sampled=rot_successive(j,2);
-            polyhedron_lim_sampled=polyhedron_lim(j,1);
-
-            
-%             A_diff_c_p_no_z((1:N)+N*(j-1),:)=sin_sampled*Pu_diff_c_p;
-%             zA_diff_c_p((1:N)+N*(j-1),:)=cos_sampled*z_Pu_diff_c;
-            A_diff_c_p_no_z=[A_diff_c_p_no_z;sin_sampled*Pu_diff_c_p(:,:)];
-            zA_diff_c_p=[zA_diff_c_p;cos_sampled*z_Pu_diff_c(:,:)];
-            
-%             xzb_diff_c_p((1:N)+N*(j-1),:)=polyhedron_lim_sampled-sin_sampled*xf_diff_c_p-cos_sampled*zf_diff_C_p;
-%             yzb_diff_c_p((1:N)+N*(j-1),:)=polyhedron_lim_sampled-sin_sampled*yf_diff_c_p-cos_sampled*zf_diff_C_p;
-            xzb_diff_c_p=[xzb_diff_c_p;polyhedron_lim_sampled-sin_sampled*xf_diff_c_p(:,:)-cos_sampled*zf_diff_C_p(:,:)];
-            yzb_diff_c_p=[yzb_diff_c_p;polyhedron_lim_sampled-sin_sampled*yf_diff_c_p(:,:)-cos_sampled*zf_diff_C_p(:,:)];
-        end
-    end
-
-    A_diff_c_p=[A_diff_c_p_no_z zeros(size(A_diff_c_p_no_z)) zA_diff_c_p;...
-        zeros(size(A_diff_c_p_no_z)) A_diff_c_p_no_z zA_diff_c_p];
-
-    b_diff_c_p=[xzb_diff_c_p;yzb_diff_c_p];
-
-    
-    if i>=120
-        A=[A;A_diff_c_p];
-        b=[b;b_diff_c_p];
-    else
-        A=[A;A_diff_c_p];
-        b=[b;b_diff_c_p];
-    end
-
-
-%     A_height=[Pu_c;-Pu_c];
-%     b_height=[0.9-zf_c;-0.7+zf_c];
-% 
-%     A=[A;zeros(size(A_height,1),size(A_zmp,2)) A_height];
-%     b=[b;b_height];
+    %% Constraint Inequalities
+    run('script/script_cons_ineq.m')
     
     %% constraints
     Aeq=[];beq=[];lb=[];ub=[];x0=[];
@@ -569,71 +387,282 @@ xcapture=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
 ycapture=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
 
 
-% %% Plot results
-% run('script/script_plot_results.m')
+%% Plot results
+run('script/script_plot_results.m')
 
-figure(7)
+%%
+hstep_move=0.05;
+pstep_3d=[pstep zstep];
+pstep_3d_phase_r=[];
+pstep_3d_phase_l=[];
+for i=1:length(phase_type)
+    if phase_type(i)=='b'
+        if i<length(phase_type)
+            if phase_type(i+1)=='r'
+                pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(2,:);];
+                pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);];
+            else
+                pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(1,:);];
+                pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(2,:);];
+            end
+        else
+            if phase_type(i-1)=='l'
+                pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(2,:);];
+                pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);];
+            else
+                pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(1,:);];
+                pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(2,:);];
+            end
+        end
+    pstep_3d(1,:)=[];
+    elseif phase_type(i)=='r'
+        pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(1,:);pstep_3d(1,:);];
+        pstep_3d_phase_l=[pstep_3d_phase_l;...
+            [(pstep_3d_phase_l(end,1:2)+pstep_3d(2,1:2))./2 max(pstep_3d_phase_l(end,3),pstep_3d(2,3))+hstep_move];...
+            pstep_3d(2,:);];
+    else
+        pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);pstep_3d(1,:);];
+        pstep_3d_phase_r=[pstep_3d_phase_r;...
+            [(pstep_3d_phase_r(end,1:2)+pstep_3d(2,1:2))./2 max(pstep_3d_phase_r(end,3),pstep_3d(2,3))+hstep_move];...
+             pstep_3d(2,:);];
+    end
+end
+%%
+% figure(8)
+% clf
+% title('trajectories foot in air')
+% 
+% ax1 = subplot(3,1,1);
+% ylabel('x [m]') % y-axis label
+% hold on
+% plot(pstep_3d_phase_r(:,1))
+% plot(pstep_3d_phase_l(:,1))
+% hold off
+% 
+% ax2 = subplot(3,1,2);
+% ylabel('y [m]') % y-axis label
+% hold on
+% plot(pstep_3d_phase_r(:,2))
+% plot(pstep_3d_phase_l(:,2))
+% hold off
+% 
+% ax3 = subplot(3,1,3);
+% ylabel('z [m]') % y-axis label
+% hold on
+% plot(pstep_3d_phase_r(:,3))
+% plot(pstep_3d_phase_l(:,3))
+% hold off
+% linkaxes([ax1,ax2,ax3],'x')
+% legend('R foot','Lfoot','Location','southeast')
+
+%%
+phase_type_enlarge=ones(length(phase_type) + length(phase_type(2:2:end)),1);
+phase_type_enlarge(:) = nan;
+phase_type_enlarge(3:3:end,:)=phase_type(2:2:end,:);
+locations = any(isnan(phase_type_enlarge),2);
+phase_type_enlarge(locations) = phase_type;
+phase_type_enlarge=char(phase_type_enlarge);
+
+phase_duration_enlarge=zeros(length(phase_type_enlarge),1);
+phase_duration_enlarge(any(phase_type_enlarge=='r',2))=phase_duration_r/2;
+phase_duration_enlarge(any(phase_type_enlarge=='l',2))=phase_duration_l/2;
+phase_duration_enlarge(any(phase_type_enlarge=='b',2))=phase_duration_b;
+phase_duration_enlarge(1)=phase_duration_start;
+phase_duration_enlarge(end)=phase_duration_stop;
+
+phase_duration_cumul_enlarge=zeros(length(phase_duration_enlarge),1);
+for i=1:length(phase_duration_enlarge)
+    phase_duration_cumul_enlarge(i,1)=sum(phase_duration_enlarge(1:i,1));
+end
+
+[A_f,B_f]=compute_coeff_poly6_interpolation([0;phase_duration_cumul_enlarge],[],[],size(phase_type_enlarge,1),(size(phase_type_enlarge,1)+1)*3);
+
+%%
+%   1. Define new vector Y based on existing vector x,
+viapoint_l = ones(length(pstep_3d_phase_l)+1 + length(pstep_3d_phase_l)*2+2,3);
+viapoint_l(:) = nan;
+%2. Insert New.Values into respective cells of Y, for example
+viapoint_l(2:3:end,:) = 0;
+viapoint_l(3:3:end,:) = 0;
+% 3. after all new values inserted, find locations of NaN in Y;
+locations = find(isnan(viapoint_l));
+% 4. Replace the found locations of Y with existing x values;
+viapoint_l(locations) = [pstep_3d_phase_l(1,:);pstep_3d_phase_l;];
+
+%
+A_f_l=A_f*viapoint_l;
+
+%   1. Define new vector Y based on existing vector x,
+viapoint_r = ones(length(pstep_3d_phase_r)+1 + length(pstep_3d_phase_r)*2+2,3);
+viapoint_r(:) = nan;
+%2. Insert New.Values into respective cells of Y, for example
+viapoint_r(2:3:end,:) = 0;
+viapoint_r(3:3:end,:) = 0;
+% 3. after all new values inserted, find locations of NaN in Y;
+locations = find(isnan(viapoint_r));
+% 4. Replace the found locations of Y with existing x values;
+viapoint_r(locations) = [pstep_3d_phase_r(1,:);pstep_3d_phase_r;];
+
+%
+A_f_r=A_f*viapoint_r;
+%%
+% dt_time=zeros(length(phase_type_enlarge),size(A_f_l,1));
+% for i=1:size(dt_time,1)
+%     dt_time(i,(i-1)*6+1)=1;
+% end
+% 
+% toto=dt_time*A_f_l;
+
+frequency=200;
+discretization=phase_duration_enlarge*200;
+
+phase_type_sampling_enlarge=[];
+for i=1:length(phase_duration_enlarge)
+    phase_type_sampling_enlarge=[phase_type_sampling_enlarge;repmat(phase_type_enlarge(i),discretization(i),1)];
+end
+
+[mdt] = compute_coeff_dt_matrix(discretization,frequency,length(phase_type_enlarge),length(phase_type_sampling_enlarge)+1);
+[mddt] = compute_coeff_ddt_matrix(discretization,frequency);
+[mdddt] = compute_coeff_dddt_matrix(discretization,frequency);
+
+pankle_l=mdt*A_f_l;
+pankle_r=mdt*A_f_r;
+
+vankle_l=mddt*A_f_l;
+vankle_r=mddt*A_f_r;
+
+aankle_l=mdddt*A_f_l;
+aankle_r=mdddt*A_f_r;
+
+%%
+figure(9)
 clf
+title('trajectories foot in air')
 
-ax1 = subplot(2,1,1);
-title('trajectory of COM 3d')
-xlabel('x [m]') % x-axis label
-ylabel('y [m]') % y-axis label
-zlabel('z [m]') % z-axis label
-view(3)
+ax1 = subplot(3,1,1);
+ylabel('x [m]') % y-axis label
 hold on
-plot3(xc,yc,zc,'-*k')
+plot(pankle_r(:,1))
+plot(pankle_l(:,1))
 hold off
-legend('COM','Location','southeast')
 
-ax2 = subplot(2,1,2);
-title('trajectories 3d')
-xlabel('x [m]') % x-axis label
+ax2 = subplot(3,1,2);
 ylabel('y [m]') % y-axis label
-zlabel('z [m]') % z-axis label
-view(3)
 hold on
-plot3(xz,...
-    yz,...
-    zz,...
-    '-*g')
-
-plot3(xz_up,...
-    yz_up,...
-    zz_up,...
-    '-*r')
-plot3(xz_down,...
-    yz_down,...
-    zz_down,...
-    '-*m')
-
-plot3(xcapture,...
-    ycapture,...
-    zcapture,...
-    '-*b')
+plot(pankle_r(:,2))
+plot(pankle_l(:,2))
 hold off
-hold on;
-pstep=[xstep ystep];
-psi=zeros(size(pstep,1)*3,1);
-firstSS=(phase_type(2)=='r');
 
-XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
-for j=1:length(pstep)
-    plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),'-k','LineWidth',2)
-end
-
-XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_margin,exttoankle-sole_margin,inttoankle-sole_margin,firstSS);
-for j=1:length(pstep)
-    plot3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),':k','LineWidth',2)
-end
-
-XY=drawing_rectangle_rotate(pstep,psi,backtoankle+4*sole_margin,fronttoankle+4*sole_margin,exttoankle+4*sole_margin,inttoankle+4*sole_margin,firstSS);
-for j=1:length(pstep)
-    fill3(XY(j,1:5),XY(j,6:10),repmat(zstep(j),1,5),[132,200,225]/255,'LineStyle','none')
-end
+ax3 = subplot(3,1,3);
+ylabel('z [m]') % y-axis label
+hold on
+plot(pankle_r(:,3))
+plot(pankle_l(:,3))
 hold off
-hlink = linkprop([ax1,ax2],{'CameraPosition','CameraUpVector'}); 
-rotate3d on
+linkaxes([ax1,ax2,ax3],'x')
+legend('R foot','Lfoot','Location','southeast')
 
-legend('CoP','CoP up','CoP down','Capture point','Location','southeast')
+%% 
+t=[[1/frequency:1/frequency:T]' [(1/frequency:1/frequency:T).^2./2]'];
+t=[ones(size(t,1),1) t];
+dt=[zeros(size(t,1),1) ones(size(t,1),1) [1/frequency:1/frequency:T]'];
+ddt=[zeros(size(t,1),1) zeros(size(t,1),1) ones(size(t,1),1)];
+dddt=[(1/frequency:1/frequency:T)]';
 
+xc_discret=[xc(1)];
+xdc_discret=[xc(1)];
+xddc_discret=[xc(1)];
+
+yc_discret=[yc(1)];
+ydc_discret=[yc(1)];
+yddc_discret=[yc(1)];
+
+zc_discret=[zc(1)];
+zdc_discret=[zc(1)];
+zddc_discret=[zc(1)];
+for i=1:size(xdddc_storage,1)
+    xc_discret=[xc_discret;t*[xc(i);xdc(i);xddc(i)]+dddt.^3/6*xdddc_storage(i)];
+    xdc_discret=[xdc_discret;dt*[xc(i);xdc(i);xddc(i)]+dddt.^2/2*xdddc_storage(i)];
+    xddc_discret=[xddc_discret;ddt*[xc(i);xdc(i);xddc(i)]+dddt*xdddc_storage(i)];
+    
+    yc_discret=[yc_discret;t*[yc(i);ydc(i);yddc(i)]+dddt.^3/6*ydddc_storage(i)];
+    ydc_discret=[ydc_discret;dt*[yc(i);ydc(i);yddc(i)]+dddt.^2/2*ydddc_storage(i)];
+    yddc_discret=[yddc_discret;ddt*[yc(i);ydc(i);yddc(i)]+dddt*ydddc_storage(i)];
+    
+    zc_discret=[zc_discret;t*[zc(i);zdc(i);zddc(i)]+dddt.^3/6*zdddc_storage(i)];
+    zdc_discret=[zdc_discret;dt*[zc(i);zdc(i);zddc(i)]+dddt.^2/2*zdddc_storage(i)];
+    zddc_discret=[zddc_discret;ddt*[zc(i);zdc(i);zddc(i)]+dddt*zdddc_storage(i)];
+end
+
+zzmp_ref_discret=zeros(round(max(phase_duration_cumul)*frequency),1);
+zzmp_ref_discret(round(phase_duration_cumul(3)*frequency)+1:round(phase_duration_cumul(5)*frequency))=0.05;
+zzmp_ref_discret(round(phase_duration_cumul(5)*frequency)+1:round(phase_duration_cumul(7)*frequency))=0.1;
+zzmp_ref_discret(round(phase_duration_cumul(7)*frequency)+1:round(phase_duration_cumul(9)*frequency))=0.15;
+zzmp_ref_discret(round(phase_duration_cumul(9)*frequency)+1:end)=0.2;
+% zz=[zzmp_ref(1);zzmp_ref(1:end-1)];
+% zz(length(zc)+1:end)=[];
+zz_discret=[zzmp_ref_discret(1);zzmp_ref_discret(1:end)];
+
+xz_discret=1*xc_discret+0*xdc_discret-(zc_discret-zz_discret)./(zddc_discret+g).*xddc_discret;
+yz_discret=1*yc_discret+0*ydc_discret-(zc_discret-zz_discret)./(zddc_discret+g).*yddc_discret;
+%%
+figure()
+clf
+hold on
+plot(xz,yz,'o')
+plot(xz_discret,yz_discret)
+hold off
+
+figure()
+clf
+hold on
+plot(xc,yc,'o')
+plot(xc_discret,yc_discret)
+hold off
+
+%% 
+dt_type_phase_=any(phase_type_sampling_enlarge=='l',2)*1+any(phase_type_sampling_enlarge=='r',2)*2;
+dt_type_phase_=[0;dt_type_phase_];
+    
+%% write txt
+e_=0.099;
+e=0;
+trajectories=[dt_type_phase_ ...
+        xz_discret yz_discret zz_discret ...
+        xc_discret yc_discret zc_discret ...
+        xdc_discret ydc_discret zdc_discret ...
+        xddc_discret yddc_discret zddc_discret ...
+        pankle_l(:,1) pankle_l(:,2) pankle_l(:,3)+e_-e ...
+        vankle_l(:,1) vankle_l(:,2) vankle_l(:,3) ...
+        aankle_l(:,1) aankle_l(:,2) aankle_l(:,3) ...
+        pankle_r(:,1) pankle_r(:,2) pankle_r(:,3)+e_-e ...
+        vankle_r(:,1) vankle_r(:,2) vankle_r(:,3) ...
+        aankle_r(:,1) aankle_r(:,2) aankle_r(:,3) ...
+        pankle_l(:,1)*0 pankle_l(:,2)*0 pankle_l(:,3)*0 ... %rtheta_dt_r rphi_dt_r
+        pankle_r(:,1)*0 pankle_r(:,2)*0 pankle_r(:,3)*0]; %rtheta_dt_r rphi_dt_r
+    
+%% %save data in txt
+% zmpcom=fopen('zmp_com_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
+zmpcom=fopen('zmp_com_test.txt','w');
+
+
+for i=1:size(trajectories,1)
+    fprintf(zmpcom,'%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n',trajectories(i,:));
+end
+fclose(zmpcom);
+
+%%
+psi_=pstep(:,1)*0;
+
+pstep_=[pstep(:,1) pstep(:,2) psi_];
+% pstepf=fopen('pstep_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
+pstepf=fopen('pstep_test.txt','w');
+
+
+for i=1:size(pstep_,1)
+    fprintf(pstepf,'%f %f %f\n',pstep_(i,:));
+end
+fclose(pstepf);
+
+fclose('all');
+%%%%%%%%%%%
