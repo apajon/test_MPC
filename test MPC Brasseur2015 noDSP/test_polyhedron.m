@@ -1,5 +1,5 @@
-h_com_max=+0.05;
-h_com_min=-0.2;
+% h_com_max=+0.05;
+% h_com_min=-0.2;
 
 angle_tot=acos((h_com+h_com_min)/(h_com+h_com_max));
 angle_divide=angle_tot/3;

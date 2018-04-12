@@ -1,4 +1,8 @@
 %% initialization from last robot COM state
+    %% COM position
+    xf_c=Px_c*[xc(i);xdc(i);xddc(i)];
+    yf_c=Px_c*[yc(i);ydc(i);yddc(i)];
+    zf_c=Px_c*[zc(i);zdc(i);zddc(i)];
     %% COM velocity
     xf_dc=Px_dc*[xc(i);xdc(i);xddc(i)];
     yf_dc=Px_dc*[yc(i);ydc(i);yddc(i)];
@@ -6,6 +10,10 @@
     %% COM velocity ref
     xf_dc_ref=xvcom_ref(1+(i-1):N+(i-1));
     yf_dc_ref=yvcom_ref(1+(i-1):N+(i-1));
+    
+    %% COM acceleration
+    xf_ddc=Px_ddc*[xc(i);xdc(i);xddc(i)];
+    yf_ddc=Px_ddc*[yc(i);ydc(i);yddc(i)];
     
     
     %% ZMP
@@ -51,3 +59,22 @@
     Pu_z_mean=(Pu_z_up+Pu_z_down)/2;
     
     H_z_mean=Pu_z_mean.'*Pu_z_mean;
+    
+    %% Capture point up
+    Px_Capture_up=Px_c+Px_dc.*repmat(sqrt(zeta_up_ref(1+(i-1):N+(i-1),:)),1,size(Px_dc,2));
+    
+    xf_Capture_up=Px_Capture_up*[xc(i);xdc(i);xddc(i)];
+    yf_Capture_up=Px_Capture_up*[yc(i);ydc(i);yddc(i)];
+    zf_Capture_up=Px_Capture_up*[zc(i);zdc(i);zddc(i)];
+    
+    Pu_Capture_up=Pu_c+Pu_dc.*repmat(sqrt(zeta_up_ref(1+(i-1):N+(i-1),:)),1,size(Pu_dc,2));
+    
+    %% Capture point down
+    Px_Capture_down=Px_c+Px_dc.*repmat(sqrt(zeta_down_ref(1+(i-1):N+(i-1),:)),1,size(Px_dc,2));
+    
+    xf_Capture_down=Px_Capture_down*[xc(i);xdc(i);xddc(i)];
+    yf_Capture_down=Px_Capture_down*[yc(i);ydc(i);yddc(i)];
+    zf_Capture_down=Px_Capture_down*[zc(i);zdc(i);zddc(i)];
+    
+    Pu_Capture_down=Pu_c+Pu_dc.*repmat(sqrt(zeta_down_ref(1+(i-1):N+(i-1),:)),1,size(Pu_dc,2));
+    

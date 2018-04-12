@@ -4,19 +4,6 @@
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
     no_double_support=(sum(Px_step_ref==1,2)==1);
     no_double_support=no_double_support(1+(i-1):N+(i-1),:);
-    if isempty(Pu_step)
-        A_zmp=[Pu_z_up(no_double_support,:);...
-            -Pu_z_up(no_double_support,:);...
-            Pu_z_down(no_double_support,:);...
-            -Pu_z_down(no_double_support,:)];
-    else
-        A_zmp=[Pu_z_up(no_double_support,:) -Pu_step(no_double_support,:);...
-            -Pu_z_up(no_double_support,:) Pu_step(no_double_support,:);...
-            Pu_z_down(no_double_support,:) -Pu_step(no_double_support,:);...
-            -Pu_z_down(no_double_support,:) Pu_step(no_double_support,:)];
-    end
-    
-    A_zmp=blkdiag(A_zmp,A_zmp);
     
 %     right_support=any(phase_type_sampling_reduce=='r',2);
 %     left_support=any(phase_type_sampling_reduce=='l',2);
@@ -30,27 +17,13 @@
         right_support=false(size(no_double_support));
         left_support=false(size(no_double_support));
     end
-        
     
-    xb_zmp=[no_double_support(no_double_support)*(fronttoankle-sole_margin);...
-        no_double_support(no_double_support)*(backtoankle-sole_margin);...
-        no_double_support(no_double_support)*(fronttoankle-sole_margin);...
-        no_double_support(no_double_support)*(backtoankle-sole_margin)]...
-        +[xf_step(no_double_support,:)-xf_z_up(no_double_support,:);...
-        -xf_step(no_double_support,:)+xf_z_up(no_double_support,:);...
-        xf_step(no_double_support,:)-xf_z_down(no_double_support,:);...
-        -xf_step(no_double_support,:)+xf_z_down(no_double_support,:)];
-    
-    yb_zmp=[right_support(no_double_support)*(inttoankle-sole_margin)+left_support(no_double_support)*(exttoankle-sole_margin);...
-        right_support(no_double_support)*(exttoankle-sole_margin)+left_support(no_double_support)*(inttoankle-sole_margin);...
-        right_support(no_double_support)*(inttoankle-sole_margin)+left_support(no_double_support)*(exttoankle-sole_margin);...
-        right_support(no_double_support)*(exttoankle-sole_margin)+left_support(no_double_support)*(inttoankle-sole_margin)]...
-        +[yf_step(no_double_support,:)-yf_z_up(no_double_support,:);...
-        -yf_step(no_double_support,:)+yf_z_up(no_double_support,:);...
-        yf_step(no_double_support,:)-yf_z_down(no_double_support,:);...
-        -yf_step(no_double_support,:)+yf_z_down(no_double_support,:)];
-    
-    b_zmp=[xb_zmp;yb_zmp];
+    [A_zmp,b_zmp]=function_constraint_convexhull(...
+    Pu_z_up,Pu_z_down,Pu_step,...
+    xf_z_up,xf_z_down,xf_step,...
+    yf_z_up,yf_z_down,yf_step,...
+    no_double_support,right_support,left_support,...
+    fronttoankle,backtoankle,inttoankle,exttoankle,sole_margin);
         
     %% Constraint foot step stretching
     A_step_stretch=[];
@@ -124,44 +97,12 @@
     
     
     %% constraint kinematics com height (polyhedron)
-    Pu_diff_c_p=[Pu_c zeros(N,size(Pu_step,2))]-[zeros(N,size(Pu_c,2)) Pu_step];
-    z_Pu_diff_c=Pu_c;
-
-    xf_diff_c_p=Px_c*[xc(i);xdc(i);xddc(i)]-xf_step;
-    yf_diff_c_p=Px_c*[yc(i);ydc(i);yddc(i)]-yf_step;
-    zf_diff_C_p=Px_c*[zc(i);zdc(i);zddc(i)]-zzmp_ref_reduce;
-
-%     A_diff_c_p_no_z=zeros(N*size(rot_successive,1),size(Pu_diff_c_p,2));
-%     zA_diff_c_p=zeros(N*size(rot_successive,1),size(z_Pu_diff_c,2));
-%     xzb_diff_c_p=zeros(N*size(rot_successive,1),1);
-%     yzb_diff_c_p=zeros(N*size(rot_successive,1),1);
-    A_diff_c_p_no_z=[];
-    zA_diff_c_p=[];
-    xzb_diff_c_p=[];
-    yzb_diff_c_p=[];
-    if isempty(z_Pu_diff_c)==0
-        for j=1:size(rot_successive,1)
-            sin_sampled=rot_successive(j,1);
-            cos_sampled=rot_successive(j,2);
-            polyhedron_lim_sampled=polyhedron_lim(j,1);
-
-            
-%             A_diff_c_p_no_z((1:N)+N*(j-1),:)=sin_sampled*Pu_diff_c_p;
-%             zA_diff_c_p((1:N)+N*(j-1),:)=cos_sampled*z_Pu_diff_c;
-            A_diff_c_p_no_z=[A_diff_c_p_no_z;sin_sampled*Pu_diff_c_p(:,:)];
-            zA_diff_c_p=[zA_diff_c_p;cos_sampled*z_Pu_diff_c(:,:)];
-            
-%             xzb_diff_c_p((1:N)+N*(j-1),:)=polyhedron_lim_sampled-sin_sampled*xf_diff_c_p-cos_sampled*zf_diff_C_p;
-%             yzb_diff_c_p((1:N)+N*(j-1),:)=polyhedron_lim_sampled-sin_sampled*yf_diff_c_p-cos_sampled*zf_diff_C_p;
-            xzb_diff_c_p=[xzb_diff_c_p;polyhedron_lim_sampled-sin_sampled*xf_diff_c_p(:,:)-cos_sampled*zf_diff_C_p(:,:)];
-            yzb_diff_c_p=[yzb_diff_c_p;polyhedron_lim_sampled-sin_sampled*yf_diff_c_p(:,:)-cos_sampled*zf_diff_C_p(:,:)];
-        end
-    end
-
-    A_diff_c_p=[A_diff_c_p_no_z zeros(size(A_diff_c_p_no_z)) zA_diff_c_p;...
-        zeros(size(A_diff_c_p_no_z)) A_diff_c_p_no_z zA_diff_c_p];
-
-    b_diff_c_p=[xzb_diff_c_p;yzb_diff_c_p];
+    [A_diff_c_p,b_diff_c_p]=function_constraint_polyhedron(...
+    Pu_c,Pu_step,...
+    xf_c,xf_step,...
+    yf_c,yf_step,...
+    zf_c,zzmp_ref_reduce,...
+    rot_successive,polyhedron_lim);
 
     
     if i>=120
@@ -178,3 +119,124 @@
 % 
 %     A=[A;zeros(size(A_height,1),size(A_zmp,2)) A_height];
 %     b=[b;b_height];
+
+%% Constraint Last Capture point in convex hull
+    no_double_support_capture=(sum(Px_step_ref==1,2)==1);
+    no_double_support_capture=no_double_support_capture(1+(i-1):N+(i-1),:);
+    no_double_support_capture(1:end-1,:)=[no_double_support_capture(1:end-1,:)==2];
+
+    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+        right_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        left_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+        right_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        left_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+    else
+        right_support_capture=false(size(no_double_support_capture));
+        left_support_capture=false(size(no_double_support_capture));
+    end
+        
+    [A_Capture,b_Capture]=function_constraint_convexhull(...
+    Pu_Capture_up,Pu_Capture_down,Pu_step,...
+    xf_Capture_up,xf_Capture_down,xf_step,...
+    yf_Capture_up,yf_Capture_down,yf_step,...
+    no_double_support_capture,right_support_capture,left_support_capture,...
+    fronttoankle,backtoankle,inttoankle,exttoankle,sole_margin);
+    
+    A_Capture=[A_Capture zeros(size(A_Capture,1),size(H_c,2))];  
+    
+    % Constraint concatenation
+    if i>=120
+        A=[A;A_Capture*0];
+        b=[b;b_Capture*0]; 
+    else
+        A=[A;A_Capture];
+        b=[b;b_Capture]; 
+    end
+       
+%% constraint kinematics capture point height (polyhedron)
+    if isempty(Pu_step) %deal with indices of empty matrix
+        Pu_step_temp=ones(1,0);
+    else
+        Pu_step_temp=Pu_step(end,:);
+    end
+    
+    [A_diff_capture_p_down,b_diff_capture_p_down]=function_constraint_polyhedron(...
+    Pu_Capture_down(end,:),Pu_step_temp,...
+    xf_Capture_down(end,:),xf_step(end,:),...
+    yf_Capture_down(end,:),yf_step(end,:),...
+    zf_Capture_down(end,:),zzmp_ref_reduce(end,:),...
+    rot_successive,polyhedron_lim);
+
+    
+    if i>=120
+        A=[A;A_diff_capture_p_down];
+        b=[b;b_diff_capture_p_down];
+    else
+        A=[A;A_diff_capture_p_down];
+        b=[b;b_diff_capture_p_down];
+    end
+    
+    [A_diff_capture_p_up,b_diff_capture_p_up]=function_constraint_polyhedron(...
+    Pu_Capture_up(end,:),Pu_step_temp,...
+    xf_Capture_up(end,:),xf_step(end,:),...
+    yf_Capture_up(end,:),yf_step(end,:),...
+    zf_Capture_up(end,:),zzmp_ref_reduce(end,:),...
+    rot_successive,polyhedron_lim);
+
+    
+    if i>=120
+        A=[A;A_diff_capture_p_up];
+        b=[b;b_diff_capture_p_up];
+    else
+        A=[A;A_diff_capture_p_up];
+        b=[b;b_diff_capture_p_up];
+    end
+     
+%% constraint kinematics COM height (polyhedron) in DSP
+    double_support_before=[any([phase_type_sampling(16:16+15)=='b']+[phase_type_sampling(17:16+16)~='b']==2,2);false];
+    double_support_after=[false;any([phase_type_sampling(16:16+15)=='b']+[phase_type_sampling(17:16+16)~='b']==2,2)];
+    
+    if isempty(Pu_step) %deal with indices of empty matrix
+        Pu_step_temp=ones(sum(double_support_after),0);
+    else
+        Pu_step_temp=Pu_step(double_support_after,:);
+    end
+    
+    [A_diff_c_p_DSP_before,b_diff_c_p_DSP_before]=function_constraint_polyhedron(...
+    Pu_c(double_support_before,:),Pu_step_temp,...
+    xf_c(double_support_before,:),xf_step(double_support_after,:),...
+    yf_c(double_support_before,:),yf_step(double_support_after,:),...
+    zf_c(double_support_before,:),zzmp_ref_reduce(double_support_after,:),...
+    rot_successive,polyhedron_lim);
+
+    
+    if i>=120
+        A=[A;A_diff_c_p_DSP_before];
+        b=[b;b_diff_c_p_DSP_before];
+    else
+        A=[A;A_diff_c_p_DSP_before];
+        b=[b;b_diff_c_p_DSP_before];
+    end
+    
+    if isempty(Pu_step) %deal with indices of empty matrix
+        Pu_step_temp=ones(sum(double_support_before),0);
+    else
+        Pu_step_temp=Pu_step(double_support_before,:);
+    end
+    
+    [A_diff_c_p_DSP_after,b_diff_c_p_DSP_after]=function_constraint_polyhedron(...
+    Pu_c(double_support_after,:),Pu_step_temp,...
+    xf_c(double_support_after,:),xf_step(double_support_before,:),...
+    yf_c(double_support_after,:),yf_step(double_support_before,:),...
+    zf_c(double_support_after,:),zzmp_ref_reduce(double_support_before,:),...
+    rot_successive,polyhedron_lim);
+
+    
+    if i>=120
+        A=[A;A_diff_c_p_DSP_after];
+        b=[b;b_diff_c_p_DSP_after];
+    else
+        A=[A;A_diff_c_p_DSP_after];
+        b=[b;b_diff_c_p_DSP_after];
+    end

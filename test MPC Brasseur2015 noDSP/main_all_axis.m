@@ -41,7 +41,7 @@ H_c=Pu_c.'*Pu_c;
 % Cost pre-concatenate
 H_Pu=w1*H_dddc+w2*H_dc;
 
-
+toto=[];
 %% Optimization problem QP
 % Sampling update
 tic
@@ -59,15 +59,19 @@ for i=1:round(max(phase_duration_cumul)/T)
     %% Constraint Inequalities
     run('script/script_cons_ineq.m')
     
+    %% Constraint Equalities
+    run('script/script_cons_eq.m')
+    
     %% constraints
-    Aeq=[];beq=[];lb=[];ub=[];x0=[];
+    lb=[];ub=[];x0=[];
 
     %% Options
+%     options=optimoptions('quadprog','Display','iter','MaxIterations',1000);
     options=optimoptions('quadprog','Display','final');
 %     options=optimoptions('quadprog','Display','off');
 
     %% Optimization QP
-    QP_result=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
+    [QP_result,tata,toto(i)]=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
     
     xdddc_storage=[xdddc_storage;QP_result(1)];
     ydddc_storage=[ydddc_storage;QP_result(size(A_zmp,2)/2+1)];
@@ -386,6 +390,10 @@ zcapture=zz;
 xcapture=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
 ycapture=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
 
+xdcm=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
+ydcm=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
+zdcm=zc+((zc-zz)./(zddc+g)).^(1/2).*zdc;
+
 
 %% Plot results
 run('script/script_plot_results.m')
@@ -625,44 +633,46 @@ dt_type_phase_=any(phase_type_sampling_enlarge=='l',2)*1+any(phase_type_sampling
 dt_type_phase_=[0;dt_type_phase_];
     
 %% write txt
-e_=0.099;
-e=0;
-trajectories=[dt_type_phase_ ...
-        xz_discret yz_discret zz_discret ...
-        xc_discret yc_discret zc_discret ...
-        xdc_discret ydc_discret zdc_discret ...
-        xddc_discret yddc_discret zddc_discret ...
-        pankle_l(:,1) pankle_l(:,2) pankle_l(:,3)+e_-e ...
-        vankle_l(:,1) vankle_l(:,2) vankle_l(:,3) ...
-        aankle_l(:,1) aankle_l(:,2) aankle_l(:,3) ...
-        pankle_r(:,1) pankle_r(:,2) pankle_r(:,3)+e_-e ...
-        vankle_r(:,1) vankle_r(:,2) vankle_r(:,3) ...
-        aankle_r(:,1) aankle_r(:,2) aankle_r(:,3) ...
-        pankle_l(:,1)*0 pankle_l(:,2)*0 pankle_l(:,3)*0 ... %rtheta_dt_r rphi_dt_r
-        pankle_r(:,1)*0 pankle_r(:,2)*0 pankle_r(:,3)*0]; %rtheta_dt_r rphi_dt_r
-    
-%% %save data in txt
-% zmpcom=fopen('zmp_com_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
-zmpcom=fopen('zmp_com_test.txt','w');
+if false
+    e_=0.099;
+    e=0;
+    trajectories=[dt_type_phase_ ...
+            xz_discret yz_discret zz_discret ...
+            xc_discret yc_discret zc_discret ...
+            xdc_discret ydc_discret zdc_discret ...
+            xddc_discret yddc_discret zddc_discret ...
+            pankle_l(:,1) pankle_l(:,2) pankle_l(:,3)+e_-e ...
+            vankle_l(:,1) vankle_l(:,2) vankle_l(:,3) ...
+            aankle_l(:,1) aankle_l(:,2) aankle_l(:,3) ...
+            pankle_r(:,1) pankle_r(:,2) pankle_r(:,3)+e_-e ...
+            vankle_r(:,1) vankle_r(:,2) vankle_r(:,3) ...
+            aankle_r(:,1) aankle_r(:,2) aankle_r(:,3) ...
+            pankle_l(:,1)*0 pankle_l(:,2)*0 pankle_l(:,3)*0 ... %rtheta_dt_r rphi_dt_r
+            pankle_r(:,1)*0 pankle_r(:,2)*0 pankle_r(:,3)*0]; %rtheta_dt_r rphi_dt_r
+
+    %% %save data in txt
+    % zmpcom=fopen('zmp_com_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
+    zmpcom=fopen('zmp_com_test.txt','w');
 
 
-for i=1:size(trajectories,1)
-    fprintf(zmpcom,'%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n',trajectories(i,:));
+    for i=1:size(trajectories,1)
+        fprintf(zmpcom,'%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n',trajectories(i,:));
+    end
+    fclose(zmpcom);
+
+    %%
+    psi_=pstep(:,1)*0;
+
+    pstep_=[pstep(:,1) pstep(:,2) psi_];
+    % pstepf=fopen('pstep_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
+    pstepf=fopen('pstep_test.txt','w');
+
+
+    for i=1:size(pstep_,1)
+        fprintf(pstepf,'%f %f %f\n',pstep_(i,:));
+    end
+    fclose(pstepf);
+
+    fclose('all');
+    %%%%%%%%%%%
 end
-fclose(zmpcom);
-
-%%
-psi_=pstep(:,1)*0;
-
-pstep_=[pstep(:,1) pstep(:,2) psi_];
-% pstepf=fopen('pstep_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
-pstepf=fopen('pstep_test.txt','w');
-
-
-for i=1:size(pstep_,1)
-    fprintf(pstepf,'%f %f %f\n',pstep_(i,:));
-end
-fclose(pstepf);
-
-fclose('all');
-%%%%%%%%%%%
