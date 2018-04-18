@@ -12,7 +12,7 @@ polyhedron_lim=[repmat((h_com+h_com_max),5,1);-(h_com+h_com_min)];
 foot_step_1=[backtoankle 0];
 foot_step_2=[-fronttoankle 0];
 
-foot_step_1=[0.25 0.14];
+foot_step_1=[0.25 0.18];
 foot_step_2=[-0.25 0];
 
 figure(6)

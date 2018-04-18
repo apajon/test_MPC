@@ -3,6 +3,11 @@ clc
 
 addpath script/ function/
 
+walking_type=1;
+% 1 : walking flat
+% 2 : walking airbus stairs
+% 3 : walking flat quick
+
 %% Constant
 run('script/script_constant.m')
 
@@ -24,10 +29,10 @@ run('script/script_init_storage_qp_result.m')
 
 %% Precomputation
 %same along x and y axis
-w1=10^-6;
-w2=10^-2;
-w3=1;
-w4=10^-2;
+w1=10^-6; %jerk
+w2=10^-2; %com vel ref
+w3=1; %zmp wth zeta mean close to step
+w4=10^-2; %com height
 
 % min Jerk
 H_dddc=eye(N);
@@ -394,10 +399,12 @@ xdcm=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
 ydcm=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
 zdcm=zc+((zc-zz)./(zddc+g)).^(1/2).*zdc;
 
+zeta=(zc-zz)./(zddc+g);
 
-%% Plot results
-run('script/script_plot_results.m')
-
+%%
+pstep=[xstep ystep];
+psi=zeros(size(pstep,1)*3,1);
+firstSS=(phase_type(2)=='r');
 %%
 hstep_move=0.05;
 pstep_3d=[pstep zstep];
@@ -631,6 +638,9 @@ hold off
 %% 
 dt_type_phase_=any(phase_type_sampling_enlarge=='l',2)*1+any(phase_type_sampling_enlarge=='r',2)*2;
 dt_type_phase_=[0;dt_type_phase_];
+
+%% Plot results
+run('script/script_plot_results.m')
     
 %% write txt
 if false
@@ -676,3 +686,8 @@ if false
     fclose('all');
     %%%%%%%%%%%
 end
+%%
+saveas(figure(8),['save_figure/figure_type_' num2str(walking_type) '_3D'])
+saveas(figure(10),['save_figure/figure_type_' num2str(walking_type) '_zeta'])
+saveas(figure(11),['save_figure/figure_type_' num2str(walking_type) '_COMfrontal'])
+saveas(figure(12),['save_figure/figure_type_' num2str(walking_type) '_COMsagittal'])

@@ -194,8 +194,8 @@
     end
      
 %% constraint kinematics COM height (polyhedron) in DSP
-    double_support_before=[any([phase_type_sampling(16:16+15)=='b']+[phase_type_sampling(17:16+16)~='b']==2,2);false];
-    double_support_after=[false;any([phase_type_sampling(16:16+15)=='b']+[phase_type_sampling(17:16+16)~='b']==2,2)];
+    double_support_before=[any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2);false];
+    double_support_after=[false;any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2)];
     
     if isempty(Pu_step) %deal with indices of empty matrix
         Pu_step_temp=ones(sum(double_support_after),0);
