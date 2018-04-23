@@ -48,7 +48,7 @@ hcom_ref=zeros(round(max(phase_duration_cumul)/T+N),1);
 hcom_ref=hcom_ref+h_com+zzmp_ref;
 
 hcom_ref_max=hcom_ref;
-hcom_ref_max(11:119)=hcom_ref_max(11:119)+h_com_max+0.1;
+hcom_ref_max(11:length(xvcom_ref)-40)=hcom_ref_max(11:length(xvcom_ref)-40)+h_com_max+0.1;
 
 %% zeta boundaries ref
 zeta_up_ref=(hcom_ref+h_com_max-zzmp_ref+0.02)/g;

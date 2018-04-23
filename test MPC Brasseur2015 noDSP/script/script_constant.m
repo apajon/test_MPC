@@ -49,7 +49,7 @@ sole_margin=0.02;
 %% Foot step placement limits
 xankmax=0.4;%stepping forward max
 xankmin=-0.4;%stepping forward min (if negative, it means stepping backward max)
-yankmin=2*inttoankle+0.05;%0.15;%width min between ankles
+yankmin=2*inttoankle+0.0552;%0.15;%width min between ankles
 yankmax=2*inttoankle+0.4;%width max between ankles
 
 %% Phase duration

@@ -1,4 +1,5 @@
 clear all
+
 clc
 
 addpath script/ function/
@@ -7,6 +8,8 @@ walking_type=1;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
+
+save_figure=false;
 
 %% Constant
 run('script/script_constant.m')
@@ -21,7 +24,22 @@ run('script/script_ref.m')
 run('script/script_zmp_com_linear_form.m')
 
 %% Polyhedron limits
-run('script/script_polyhedron.m')
+kinematic_limit='hexagonTranslation';
+%'' : very simple polyhedron
+%'hexagon' : hexagon kinematic limits
+switch kinematic_limit
+    case ''
+        number_level=[];
+        run('script/script_polyhedron.m')
+    case 'hexagon'
+        number_level=2;
+        run('script/script_polyhedron_hexagon.m')
+    case 'hexagonTranslation'
+        number_level=2;
+        run('script/script_polyhedron_hexagon_translation.m')
+    otherwise
+        error('choose a type of kinematic_limit')
+end
 
 %% Init storage QP result
 run('script/script_init_storage_qp_result.m')
@@ -29,10 +47,15 @@ run('script/script_init_storage_qp_result.m')
 
 %% Precomputation
 %same along x and y axis
+% w1=10^-6; %jerk
+% w2=10^-2; %com vel ref
+% w3=10^-2; %zmp wth zeta mean close to step
+% w4=10^-1; %com height
+
 w1=10^-6; %jerk
-w2=10^-2; %com vel ref
-w3=1; %zmp wth zeta mean close to step
-w4=10^-2; %com height
+w2=10^-1; %com vel ref
+w3=10^-1; %zmp wth zeta mean close to step
+w4=1; %com height
 
 % min Jerk
 H_dddc=eye(N);
@@ -621,14 +644,14 @@ zz_discret=[zzmp_ref_discret(1);zzmp_ref_discret(1:end)];
 xz_discret=1*xc_discret+0*xdc_discret-(zc_discret-zz_discret)./(zddc_discret+g).*xddc_discret;
 yz_discret=1*yc_discret+0*ydc_discret-(zc_discret-zz_discret)./(zddc_discret+g).*yddc_discret;
 %%
-figure()
+figure(1)
 clf
 hold on
 plot(xz,yz,'o')
 plot(xz_discret,yz_discret)
 hold off
 
-figure()
+figure(2)
 clf
 hold on
 plot(xc,yc,'o')
@@ -687,7 +710,41 @@ if false
     %%%%%%%%%%%
 end
 %%
-saveas(figure(8),['save_figure/figure_type_' num2str(walking_type) '_3D'])
-saveas(figure(10),['save_figure/figure_type_' num2str(walking_type) '_zeta'])
-saveas(figure(11),['save_figure/figure_type_' num2str(walking_type) '_COMfrontal'])
-saveas(figure(12),['save_figure/figure_type_' num2str(walking_type) '_COMsagittal'])
+if save_figure
+    saveas(figure(8),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_3D'])
+    saveas(figure(10),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_zeta'])
+    saveas(figure(11),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_COMfrontal'])
+    saveas(figure(12),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_COMsagittal'])
+    saveas(figure(13),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_TopView'])
+
+    saveas(figure(8),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_3D']...
+        ,'png')
+    saveas(figure(10),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_zeta']...
+        ,'png')
+    saveas(figure(11),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_COMfrontal']...
+        ,'png')
+    saveas(figure(12),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_COMsagittal' ]...
+        ,'png')
+    saveas(figure(13),['save_figure/figure_type_' num2str(walking_type) ...
+        '_w1_' num2str(w1,'%10.0e') '_w2_' num2str(w2,'%10.0e') '_w3_' num2str(w3,'%10.0e') '_w4_' num2str(w4,'%10.0e') ...
+        '_' kinematic_limit num2str(number_level) '_TopView' ]...
+        ,'png')
+end
