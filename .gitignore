@@ -4,3 +4,4 @@
 *.log
 *.synctex.gz
 root.pdf
+*save_figure*
