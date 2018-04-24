@@ -3,7 +3,7 @@
 %b = both feet; r = right foot; l = left foot
 % phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
 phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
-% phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
+% phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
 
 % Phase duration definition
 phase_duration=zeros(length(phase_type),1);
@@ -11,8 +11,9 @@ phase_duration(any(phase_type=='r',2))=phase_duration_r;
 phase_duration(any(phase_type=='l',2))=phase_duration_l;
 phase_duration(any(phase_type=='b',2))=phase_duration_b;
 phase_duration(1)=phase_duration_start;
-phase_duration(end)=phase_duration_stop;
-
+if phase_type(end)=='b'
+    phase_duration(end)=phase_duration_stop;
+end
 
 % Phase duration cumulative
 phase_duration_cumul=zeros(length(phase_duration),1);
@@ -46,4 +47,8 @@ for i=2:size(Px_step_b,2)
 end
 
 Px_step_ref=[Px_step_b zeros(size(Px_step_b,1),1)]+[zeros(size(Px_step_b,1),1) Px_step_b];
-Px_step_ref(:,2:end-1)=Px_step_ref(:,2:end-1)+Px_step_rl;
+if phase_type(end)=='b'
+    Px_step_ref(:,2:end-1)=Px_step_ref(:,2:end-1)+Px_step_rl;
+else
+    Px_step_ref(:,2:end)=Px_step_ref(:,2:end)+Px_step_rl;
+end

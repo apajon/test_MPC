@@ -12,7 +12,7 @@ function [A,b]=function_constraint_polyhedron_hexagon_translation(...
     z_Pu_diff_c=Pu_c;
 
     xf_diff_c_p=xf_c-xf_step;
-    yf_diff_c_p=yf_c-yf_step+(-left_support+right_support)*ytranslation;
+    yf_diff_c_p=yf_c-yf_step+(left_support-right_support)*ytranslation;
     zf_diff_c_p=zf_c-zf_step;
     
     A_diff_c_p=[zeros(size(Pu_c,1),size(Pu_c,2)*2) zeros(size(Pu_step,1),size(Pu_step,2)*2) -z_Pu_diff_c];

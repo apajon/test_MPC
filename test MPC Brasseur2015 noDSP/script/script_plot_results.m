@@ -93,7 +93,7 @@ end
 hold off
 legend('COM','CoP','CoP up','CoP down','Capture point','Location','southeast')
 
-%% Plot results 3D
+%% Plot results top view
 figure(13)
 clf
 
@@ -125,6 +125,18 @@ XY=drawing_rectangle_rotate(pstep,psi,backtoankle-sole_margin,fronttoankle-sole_
 for j=1:length(pstep)
     plot(XY(j,1:5),XY(j,6:10),':k','LineWidth',2)
 end
+
+        
+% plot(p_sommet{1}(1)+xstep(12:13),p_sommet{1}(2),'*b')
+% for j=2:number_level
+%     plot(p_sommet{j}(1:3:end)+xstep(12:13),p_sommet{j}(2:3:end),'-*b')
+% end
+% 
+% for j=1:number_level-1
+%     for k=1:size(edge{j},1)
+%          plot(edge{j}(k,1:3:end)+xstep(12:13),edge{j}(k,2:3:end),'-r')
+%     end
+% end
 
 % XY=drawing_rectangle_rotate(pstep,psi,backtoankle+4*sole_margin,fronttoankle+4*sole_margin,exttoankle+4*sole_margin,inttoankle+4*sole_margin,firstSS);
 % for j=1:length(pstep)
@@ -296,7 +308,7 @@ switch kinematic_limit
         zstep_sampling=zzmp_ref(1:end-15);
 
         xdiff_c_step=xc-xstep_sampling;
-        ydiff_c_step=yc-ystep_sampling+(-sign(ystep_sampling))*translation_y;
+        ydiff_c_step=yc-ystep_sampling+(sign(ystep_sampling))*translation_y;
 
 
         % a=tan(angle_successive(1:end-1)');
@@ -316,7 +328,7 @@ switch kinematic_limit
         zstep_sampling=[zzmp_ref(1:2);zzmp_ref(1:end-17)];
 
         xdiff_c_step=xc-xstep_sampling;
-        ydiff_c_step=yc-ystep_sampling+(-sign(ystep_sampling))*translation_y;
+        ydiff_c_step=yc-ystep_sampling+(sign(ystep_sampling))*translation_y;
 
 
         % a=tan(angle_successive(1:end-1)');

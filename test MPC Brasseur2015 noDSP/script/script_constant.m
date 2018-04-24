@@ -44,7 +44,7 @@ fronttoankle=0.128; %from  front to ankle of foot
 exttoankle=0.076; %from exterior to ankle of foot
 inttoankle=0.054; %from interior to ankle of foot   
 
-sole_margin=0.02;
+sole_margin=0.04;
 
 %% Foot step placement limits
 xankmax=0.4;%stepping forward max
