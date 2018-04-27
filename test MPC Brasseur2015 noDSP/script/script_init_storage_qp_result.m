@@ -33,9 +33,15 @@ zddc(1)=zcom_0(3);
 % xstep=zeros(N+1,1);
 % ystep=zeros(N+1,1);
 
-xstep=[xstep_l_0;xstep_r_0];
-ystep=[ystep_l_0;ystep_r_0];
-zstep=[zstep_l_0;zstep_r_0];
+if phase_type(2)=='r'
+    xstep=[xstep_l_0;xstep_r_0];
+    ystep=[ystep_l_0;ystep_r_0];
+    zstep=[zstep_l_0;zstep_r_0];
+elseif phase_type(2)=='l'
+    xstep=[xstep_r_0;xstep_l_0];
+    ystep=[ystep_r_0;ystep_l_0];
+    zstep=[zstep_r_0;zstep_l_0];
+end
 
 % Capture point
 xcapture=zeros(N+1,1);

@@ -53,9 +53,14 @@ run('script/script_init_storage_qp_result.m')
 % w4=10^-1; %com height
 
 w1=10^-6; %jerk
-w2=10^-1; %com vel ref
+w2=10^0; %com vel ref
 w3=10^-1; %zmp wth zeta mean close to step
-w4=1; %com height
+w4=10^0; %com height
+
+% w1=1.5*10^-4; %jerk
+% w2=10^0; %com vel ref
+% w3=10^0; %zmp wth zeta mean close to step
+% w4=10^0; %com height
 
 % min Jerk
 H_dddc=eye(N);
@@ -572,33 +577,33 @@ vankle_r=mddt*A_f_r;
 aankle_l=mdddt*A_f_l;
 aankle_r=mdddt*A_f_r;
 
-%%
-figure(9)
-clf
-title('trajectories foot in air')
-
-ax1 = subplot(3,1,1);
-ylabel('x [m]') % y-axis label
-hold on
-plot(pankle_r(:,1))
-plot(pankle_l(:,1))
-hold off
-
-ax2 = subplot(3,1,2);
-ylabel('y [m]') % y-axis label
-hold on
-plot(pankle_r(:,2))
-plot(pankle_l(:,2))
-hold off
-
-ax3 = subplot(3,1,3);
-ylabel('z [m]') % y-axis label
-hold on
-plot(pankle_r(:,3))
-plot(pankle_l(:,3))
-hold off
-linkaxes([ax1,ax2,ax3],'x')
-legend('R foot','Lfoot','Location','southeast')
+% %%
+% figure(9)
+% clf
+% title('trajectories foot in air')
+% 
+% ax1 = subplot(3,1,1);
+% ylabel('x [m]') % y-axis label
+% hold on
+% plot(pankle_r(:,1))
+% plot(pankle_l(:,1))
+% hold off
+% 
+% ax2 = subplot(3,1,2);
+% ylabel('y [m]') % y-axis label
+% hold on
+% plot(pankle_r(:,2))
+% plot(pankle_l(:,2))
+% hold off
+% 
+% ax3 = subplot(3,1,3);
+% ylabel('z [m]') % y-axis label
+% hold on
+% plot(pankle_r(:,3))
+% plot(pankle_l(:,3))
+% hold off
+% linkaxes([ax1,ax2,ax3],'x')
+% legend('R foot','Lfoot','Location','southeast')
 
 %% 
 t=[[1/frequency:1/frequency:T]' [(1/frequency:1/frequency:T).^2./2]'];
@@ -643,20 +648,20 @@ zz_discret=[zzmp_ref_discret(1);zzmp_ref_discret(1:end)];
 
 xz_discret=1*xc_discret+0*xdc_discret-(zc_discret-zz_discret)./(zddc_discret+g).*xddc_discret;
 yz_discret=1*yc_discret+0*ydc_discret-(zc_discret-zz_discret)./(zddc_discret+g).*yddc_discret;
-%%
-figure(1)
-clf
-hold on
-plot(xz,yz,'o')
-plot(xz_discret,yz_discret)
-hold off
-
-figure(2)
-clf
-hold on
-plot(xc,yc,'o')
-plot(xc_discret,yc_discret)
-hold off
+% %%
+% figure(1)
+% clf
+% hold on
+% plot(xz,yz,'o')
+% plot(xz_discret,yz_discret)
+% hold off
+% 
+% figure(2)
+% clf
+% hold on
+% plot(xc,yc,'o')
+% plot(xc_discret,yc_discret)
+% hold off
 
 %% 
 dt_type_phase_=any(phase_type_sampling_enlarge=='l',2)*1+any(phase_type_sampling_enlarge=='r',2)*2;

@@ -3,6 +3,7 @@
 %b = both feet; r = right foot; l = left foot
 % phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
 phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
+% phase_type=['b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b'];
 % phase_type=['b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b';'r';'b';'l';'b'];
 
 % Phase duration definition

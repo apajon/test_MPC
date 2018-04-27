@@ -2,26 +2,60 @@
 %%
 % add min(zeta_mean-foot_step)
 % add variable part of min(com_vel-com_vel_ref)
+xtranslate_step=(fronttoankle+backtoankle)/2-backtoankle;
+% xtranslate_step=0;
+ytranslate_step=(exttoankle+inttoankle)/2-inttoankle;
+
+%     no_double_support=any(phase_type_sampling_reduce~='b',2);
+    no_double_support=(sum(Px_step_ref==1,2)==1);
+    no_double_support=no_double_support(1+(i-1):N+(i-1),:);
+    
+%     right_support=any(phase_type_sampling_reduce=='r',2);
+%     left_support=any(phase_type_sampling_reduce=='l',2);
+    if phase_type(2)=='r'
+        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        else
+            right_support=false(size(no_double_support));
+            left_support=false(size(no_double_support));
+        end
+    elseif phase_type(2)=='l'
+        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        else
+            right_support=false(size(no_double_support));
+            left_support=false(size(no_double_support));
+        end
+    end
+
 
 if isempty(Pu_step)
         xH=H_Pu+w3*H_z_mean;
 
         xf=w2*Pu_dc.'*(xf_dc-xf_dc_ref)...
-            +w3*Pu_z_mean.'*(xf_z_mean-xf_step);
+            +w3*Pu_z_mean.'*(xf_z_mean-(xf_step+xtranslate_step));
         
         yf=w2*Pu_dc.'*(yf_dc-yf_dc_ref)...
-            +w3*Pu_z_mean.'*(yf_z_mean-yf_step);
+            +w3*Pu_z_mean.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step));
     else
         xH=[H_Pu+w3*H_z_mean -w3*Pu_z_mean.'*Pu_step;...
             (-w3*Pu_z_mean.'*Pu_step).' w3*H_step];
         
         xf=[w2*Pu_dc.'*(xf_dc-xf_dc_ref)+...
-            w3*Pu_z_mean.'*(xf_z_mean-xf_step);...
-            -w3*Pu_step.'*(xf_z_mean-xf_step)];
+            w3*Pu_z_mean.'*(xf_z_mean-(xf_step+xtranslate_step));...
+            -w3*Pu_step.'*(xf_z_mean-(xf_step+xtranslate_step))];
         
         yf=[w2*Pu_dc.'*(yf_dc-yf_dc_ref)+...
-            w3*Pu_z_mean.'*(yf_z_mean-yf_step);...
-            -w3*Pu_step.'*(yf_z_mean-yf_step)];
+            w3*Pu_z_mean.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step));...
+            -w3*Pu_step.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step))];
     end
     
     yH=xH;

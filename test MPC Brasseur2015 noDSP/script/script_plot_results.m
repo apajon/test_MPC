@@ -100,21 +100,22 @@ clf
 title('trajectories 3D')
 xlabel('x [m]') % x-axis label
 ylabel('y [m]') % y-axis label
-% axis equal
-%axis image
+axis equal
+% axis image
 hold on
-plot(xc,yc,'-*k')
+plot(xc(1:length(xvcom_ref)-39),yc(1:length(xvcom_ref)-39),'-*k')
 legend('COM','Location','southeast')
 
-plot(xz,yz,'-*g')
+plot(xz(1:length(xvcom_ref)-39),yz(1:length(xvcom_ref)-39),'-*g')
 
-plot(xz_up,yz_up,'-*r')
-plot(xz_down,yz_down,'-*m')
+plot(xz_up(1:length(xvcom_ref)-39),yz_up(1:length(xvcom_ref)-39),'-*r')
+plot(xz_down(1:length(xvcom_ref)-39),yz_down(1:length(xvcom_ref)-39),'-*m')
 
-plot(xcapture,ycapture,'-*b')
+% plot(xcapture,ycapture,'-*b')
 
-plot(xdcm,ydcm,'-*b')
+% plot(xdcm,ydcm,'-*b')
 hold off
+
 hold on;
 XY=drawing_rectangle_rotate(pstep,psi,backtoankle,fronttoankle,exttoankle,inttoankle,firstSS);
 for j=1:length(pstep)
@@ -142,8 +143,11 @@ end
 % for j=1:length(pstep)
 %     fill3(XY(j,1:5),XY(j,6:10),[132,200,225]/255,'LineStyle','none')
 % end
+
+% plot(pstep(:,1),pstep(:,2),'o');
+% plot(pstep(:,1)+xtranslate_step,pstep(:,2),'*');
 hold off
-legend('COM','CoP','CoP up','CoP down','Capture point','Location','southeast')
+legend('COM','CoP','CoP up','CoP down','Location','southeast')
 
 %% Plot results Zeta
 figure(10)
@@ -164,12 +168,14 @@ clf
 title('COM frontal')
 xlabel('y [m]') % x-axis label
 ylabel('z [m]') % y-axis label
+axis equal
+% axis image
 hold on
 plot(yc(1:vcom_change),zc(1:vcom_change),'*b')
 h1=plot(yc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
 
-plot(yc(vcom_change+1:end),zc(vcom_change+1:end),'*r')
-h2=plot(yc_discret(vcom_change*20+1:end),zc_discret(vcom_change*20+1:end),'r');
+plot(yc(vcom_change+1:(length(xvcom_ref)-39)),zc(vcom_change+1:(length(xvcom_ref)-39)),'*r')
+h2=plot(yc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),'r');
 
 hold off
 legend([h1,h2],{['COM wth spd ' num2str(vcom_1) 'm.s-1'],['COM with spd ' num2str(vcom_2) 'm.s-1']},'Location','southeast')
@@ -210,6 +216,8 @@ switch kinematic_limit
         title('COM sagittal')
         xlabel('x [m]') % x-axis label
         ylabel('z [m]') % y-axis label
+        axis equal
+%         axis image
         hold on
         plot(xc(1:vcom_change),zc(1:vcom_change),'*b')
         h1=plot(xc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
@@ -279,6 +287,8 @@ switch kinematic_limit
         title('COM sagittal')
         xlabel('x [m]') % x-axis label
         ylabel('z [m]') % y-axis label
+        axis equal
+%         axis image
         hold on
         plot(xc(1:vcom_change),zc(1:vcom_change),'*b')
         h1=plot(xc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
@@ -292,6 +302,7 @@ switch kinematic_limit
         % for i=1:size(xstep,1)-2
         %     h4=plot([-0.52:0.01:0.52]+xstep(i),[min([-0.52:0.01:0.52]'*a+repmat(b,size([-0.52:0.01:0.52],1),1),[],2) repmat(-polyhedron_lim(end),size([-0.52:0.01:0.52]',1))],'k');
         % end
+        h5=plot(pstep(:,1),h_com,'o');
 
         hold off
         if isempty(h4)
@@ -301,14 +312,17 @@ switch kinematic_limit
         end
         
     case 'hexagonTranslation'
-        translation_y=ystep_l_0*1;
+%         translation_y=ystep_l_0*1;
         
         xstep_sampling=Px_step_ref(1:end-15,:)*xstep;
         ystep_sampling=Px_step_ref(1:end-15,:)*ystep;
         zstep_sampling=zzmp_ref(1:end-15);
+%         xstep_sampling=Px_step_ref(2:end-14,:)*xstep;
+%         ystep_sampling=Px_step_ref(2:end-14,:)*ystep;
+%         zstep_sampling=zzmp_ref(2:end-14);
 
-        xdiff_c_step=xc-xstep_sampling;
-        ydiff_c_step=yc-ystep_sampling+(sign(ystep_sampling))*translation_y;
+        xdiff_c_step=xc-(xstep_sampling+translation_x);
+        ydiff_c_step=yc-(ystep_sampling-(sign(ystep_sampling))*translation_y);
 
 
         % a=tan(angle_successive(1:end-1)');
@@ -327,8 +341,8 @@ switch kinematic_limit
         ystep_sampling=[Px_step_ref(1:2,:);Px_step_ref(1:end-17,:)]*ystep;
         zstep_sampling=[zzmp_ref(1:2);zzmp_ref(1:end-17)];
 
-        xdiff_c_step=xc-xstep_sampling;
-        ydiff_c_step=yc-ystep_sampling+(sign(ystep_sampling))*translation_y;
+        xdiff_c_step=xc-(xstep_sampling+translation_x);
+        ydiff_c_step=yc-(ystep_sampling-(sign(ystep_sampling))*translation_y);
 
 
         % a=tan(angle_successive(1:end-1)');
@@ -351,12 +365,14 @@ switch kinematic_limit
         title('COM sagittal')
         xlabel('x [m]') % x-axis label
         ylabel('z [m]') % y-axis label
+        axis equal
+%         axis square
         hold on
         plot(xc(1:vcom_change),zc(1:vcom_change),'*b')
         h1=plot(xc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
 
-        plot(xc(vcom_change+1:end),zc(vcom_change+1:end),'*r')
-        h2=plot(xc_discret(vcom_change*20+1:end),zc_discret(vcom_change*20+1:end),'r');
+        plot(xc(vcom_change+1:length(xvcom_ref)-39),zc(vcom_change+1:length(xvcom_ref)-39),'*r')
+        h2=plot(xc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),'r');
 
 
         h3=plot(xc(1:length(xvcom_ref)-39),zmax(1:length(xvcom_ref)-39),'*-');
@@ -364,6 +380,7 @@ switch kinematic_limit
         % for i=1:size(xstep,1)-2
         %     h4=plot([-0.52:0.01:0.52]+xstep(i),[min([-0.52:0.01:0.52]'*a+repmat(b,size([-0.52:0.01:0.52],1),1),[],2) repmat(-polyhedron_lim(end),size([-0.52:0.01:0.52]',1))],'k');
         % end
+        h5=plot(pstep(:,1),h_com,'o');
 
         hold off
         if isempty(h4)
@@ -374,3 +391,16 @@ switch kinematic_limit
 end
 
 
+%%
+%% Plot results Zeta
+figure(14)
+clf
+title('COM velocity along x-axis')
+xlabel('t [s]') % x-axis label
+ylabel('x com velocity [m.s^-1]') % y-axis label
+hold on
+plot([0:size(xdc,1)-1]*T,xdc)
+plot([0:size(xvcom_ref,1)-1]*T,xvcom_ref)
+
+hold off
+legend('COM vel','COM vel ref','Location','southeast')

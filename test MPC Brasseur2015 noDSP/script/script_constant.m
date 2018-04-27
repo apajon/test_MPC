@@ -44,13 +44,14 @@ fronttoankle=0.128; %from  front to ankle of foot
 exttoankle=0.076; %from exterior to ankle of foot
 inttoankle=0.054; %from interior to ankle of foot   
 
-sole_margin=0.04;
+sole_margin=0.02;
 
 %% Foot step placement limits
 xankmax=0.4;%stepping forward max
 xankmin=-0.4;%stepping forward min (if negative, it means stepping backward max)
 yankmin=2*inttoankle+0.0552;%0.15;%width min between ankles
 yankmax=2*inttoankle+0.4;%width max between ankles
+% yankmax=2*inttoankle+0.0552;%width max between ankles
 
 %% Phase duration
 phase_duration_r=0.7;
@@ -63,7 +64,7 @@ phase_duration_stop=2.4;
 switch(walking_type)
     case 1
         h_com_max=+0.05;
-        h_com_min=-0.1;
+        h_com_min=-0.25;
     case 2
         h_com_max=+0.05;
         h_com_min=-0.25;

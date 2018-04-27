@@ -1,7 +1,12 @@
 %% Constraints inequalities
     %TODO orientation
+    translation_x=0;
+%     translation_x=xtranslate_step;
+
 %     translation_y=0;
-    translation_y=ystep_l_0;
+%     translation_y=-ytranslate_step;
+%     translation_y=ystep_l_0;
+     translation_y=0.06845;
 %% Constraint ZMP in convex hull
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
     no_double_support=(sum(Px_step_ref==1,2)==1);
@@ -9,15 +14,28 @@
     
 %     right_support=any(phase_type_sampling_reduce=='r',2);
 %     left_support=any(phase_type_sampling_reduce=='l',2);
-    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-    else
-        right_support=false(size(no_double_support));
-        left_support=false(size(no_double_support));
+    if phase_type(2)=='r'
+        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        else
+            right_support=false(size(no_double_support));
+            left_support=false(size(no_double_support));
+        end
+    elseif phase_type(2)=='l'
+        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        else
+            right_support=false(size(no_double_support));
+            left_support=false(size(no_double_support));
+        end
     end
     
     [A_zmp,b_zmp]=function_constraint_convexhull(...
@@ -120,7 +138,7 @@
             xf_c,xf_step,...
             yf_c,yf_step,...
             zf_c,zzmp_ref_reduce,...%zzmp_ref_reduce
-            plan_hexagon,z_leg_min+z_decalage_tot,translation_y,...
+            plan_hexagon,z_leg_min+z_decalage_tot,translation_x,translation_y,...
             left_support,right_support);
         otherwise
 %             left_support
@@ -141,11 +159,11 @@
     end
 
 
-%     A_height=[Pu_c;-Pu_c];
-%     b_height=[0.9-zf_c;-0.7+zf_c];
-% 
-%     A=[A;zeros(size(A_height,1),size(A_zmp,2)) A_height];
-%     b=[b;b_height];
+    A_height=[Pu_c;-Pu_c];
+    b_height=[0.9-zf_c;-0.7+zf_c];
+
+    A=[A;zeros(size(A_height,1),size(A_zmp,2)) A_height];
+    b=[b;b_height];
 
 %% Constraint Last Capture point in convex hull
     no_double_support_capture=(sum(Px_step_ref==1,2)==1);
@@ -181,7 +199,7 @@
         b=[b;b_Capture]; 
     end
        
-%% constraint kinematics capture point height (polyhedron)
+% constraint kinematics capture point height (polyhedron)
     if isempty(Pu_step) %deal with indices of empty matrix
         Pu_step_temp=ones(1,0);
     else
@@ -209,7 +227,7 @@
             xf_Capture_down(end,:),xf_step(end,:),...
             yf_Capture_down(end,:),yf_step(end,:),...
             zf_Capture_down(end,:),zzmp_ref_reduce(end,:),...%zzmp_ref_reduce
-            plan_hexagon,z_leg_min+z_decalage_tot,translation_y,...
+            plan_hexagon,z_leg_min+z_decalage_tot,translation_x,translation_y,...
             left_support(end,:),right_support(end,:));
         otherwise
             error('choose a type of kinematic_limit')
@@ -244,7 +262,7 @@
             xf_Capture_up(end,:),xf_step(end,:),...
             yf_Capture_up(end,:),yf_step(end,:),...
             zf_Capture_up(end,:),zzmp_ref_reduce(end,:),...%zzmp_ref_reduce
-            plan_hexagon,z_leg_min+z_decalage_tot,translation_y,...
+            plan_hexagon,z_leg_min+z_decalage_tot,translation_x,translation_y,...
             left_support(end,:),right_support(end,:));
         otherwise
             error('choose a type of kinematic_limit')
@@ -264,6 +282,29 @@
 %% constraint kinematics COM height (polyhedron) in DSP
     double_support_before=[any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2);false];
     double_support_after=[false;any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2)];
+    
+%     if phase_type_sampling_reduce(1)~='b' || (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(2)~='b')
+%         
+%         double_support_after=find(double_support_after);
+%         
+%         double_support_before=logical(double_support_before+[double_support_before(2:end);false]);
+%         
+%         length_double_support_after=length(double_support_after);
+%         for j=1:length_double_support_after
+%             double_support_after=[double_support_after(1:length_double_support_after-j) double_support_after(length_double_support_after-j+1) double_support_after(length_double_support_after-j+1:end)];
+%         end
+%     end
+    if phase_type_sampling_reduce(1)~='b' || (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(2)~='b') || (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(2)~='b'&&phase_type_sampling_reduce(3)~='b')
+        
+        double_support_after=find(double_support_after);
+        
+        double_support_before=logical(double_support_before+[double_support_before(2:end);false]+[double_support_before(3:end);false;false]);
+        
+        length_double_support_after=length(double_support_after);
+        for j=1:length_double_support_after
+            double_support_after=[double_support_after(1:length_double_support_after-j) double_support_after(length_double_support_after-j+1) double_support_after(length_double_support_after-j+1) double_support_after(length_double_support_after-j+1:end)];
+        end
+    end
     
     if isempty(Pu_step) %deal with indices of empty matrix
         Pu_step_temp=ones(sum(double_support_after),0);
@@ -287,12 +328,20 @@
             zf_c(double_support_before,:),zzmp_ref_reduce(double_support_after,:),...%zzmp_ref_reduce
             plan_hexagon,h_com+h_com_min);
         case 'hexagonTranslation'
+%             [A_diff_c_p_DSP_before,b_diff_c_p_DSP_before]=function_constraint_polyhedron_hexagon_translation(...
+%             Pu_c(double_support_before,:),Pu_step_temp,...
+%             xf_c(double_support_before,:),xf_step(double_support_after,:),...
+%             yf_c(double_support_before,:),yf_step(double_support_after,:),...
+%             zf_c(double_support_before,:),zzmp_ref_reduce(double_support_after,:),...%zzmp_ref_reduce
+%             plan_hexagon,z_leg_min+z_decalage_tot,translation_x,translation_y,...
+%             left_support(double_support_after,:),right_support(double_support_after,:));
+        
             [A_diff_c_p_DSP_before,b_diff_c_p_DSP_before]=function_constraint_polyhedron_hexagon_translation(...
             Pu_c(double_support_before,:),Pu_step_temp,...
             xf_c(double_support_before,:),xf_step(double_support_after,:),...
             yf_c(double_support_before,:),yf_step(double_support_after,:),...
             zf_c(double_support_before,:),zzmp_ref_reduce(double_support_after,:),...%zzmp_ref_reduce
-            plan_hexagon,z_leg_min+z_decalage_tot,translation_y,...
+            plan_hexagon,z_leg_min+z_decalage_tot,translation_x,translation_y,...
             left_support(double_support_after,:),right_support(double_support_after,:));
         otherwise
             error('choose a type of kinematic_limit')
@@ -308,6 +357,9 @@
         A=[A;A_diff_c_p_DSP_before];
         b=[b;b_diff_c_p_DSP_before];
     end
+    
+    double_support_before=[any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2);false];
+    double_support_after=[false;any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2)];
     
     if isempty(Pu_step) %deal with indices of empty matrix
         Pu_step_temp=ones(sum(double_support_before),0);
@@ -336,7 +388,7 @@
             xf_c(double_support_after,:),xf_step(double_support_before,:),...
             yf_c(double_support_after,:),yf_step(double_support_before,:),...
             zf_c(double_support_after,:),zzmp_ref_reduce(double_support_before,:),...%zzmp_ref_reduce
-            plan_hexagon,z_leg_min+z_decalage_tot,translation_y,...
+            plan_hexagon,z_leg_min+z_decalage_tot,translation_x,translation_y,...
             left_support(double_support_before,:),right_support(double_support_before,:));
         otherwise
             error('choose a type of kinematic_limit')

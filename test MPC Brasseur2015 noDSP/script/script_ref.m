@@ -2,7 +2,7 @@
 xvcom_ref=zeros(round(max(phase_duration_cumul)/T),1);
 yvcom_ref=zeros(round(max(phase_duration_cumul)/T),1);
 
-vcom_change=round(size(xvcom_ref,1)/2);
+vcom_change=round(size(xvcom_ref,1)*1/2);
 
 
 switch(walking_type)
@@ -51,7 +51,7 @@ hcom_ref_max=hcom_ref;
 hcom_ref_max(11:length(xvcom_ref)-40)=hcom_ref_max(11:length(xvcom_ref)-40)+h_com_max+0.1;
 
 %% zeta boundaries ref
-zeta_up_ref=(hcom_ref+h_com_max-zzmp_ref+0.02)/g;
+zeta_up_ref=(hcom_ref+h_com_max-zzmp_ref+0.32)/g;
 
 zeta_down_ref=(hcom_ref+h_com_min-zzmp_ref-0.02)/g;
 
