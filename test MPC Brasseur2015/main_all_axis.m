@@ -24,10 +24,15 @@ run('script/script_init_storage_qp_result.m')
 
 %% Precomputation
 %same along x and y axis
-w1=10^-6;
-w2=10^-2;
-w3=1;
-w4=10^-2;
+w1=10^-6; %jerk
+w2=10^-2; %com vel ref
+w3=10^0; %zmp wth zeta mean close to step
+w4=10^-2; %com height
+
+% w1=10^-7; %jerk
+% w2=10^0; %com vel ref
+% w3=0*10^-2; %zmp wth zeta mean close to step
+% w4=10^-2; %com height
 
 % min Jerk
 H_dddc=eye(N);

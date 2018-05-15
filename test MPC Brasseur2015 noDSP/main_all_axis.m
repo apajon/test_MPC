@@ -52,9 +52,14 @@ run('script/script_init_storage_qp_result.m')
 % w3=10^-2; %zmp wth zeta mean close to step
 % w4=10^-1; %com height
 
-w1=10^-6; %jerk
+w1=10^-7; %jerk
 w2=10^0; %com vel ref
-w3=10^-1; %zmp wth zeta mean close to step
+w3=0*10^-2; %zmp wth zeta mean close to step
+w4=10^-2; %com height
+
+w1=10^-5; %jerk
+w2=10^0; %com vel ref
+w3=10^0; %zmp wth zeta mean close to step
 w4=10^0; %com height
 
 % w1=1.5*10^-4; %jerk
@@ -74,7 +79,7 @@ H_c=Pu_c.'*Pu_c;
 % Cost pre-concatenate
 H_Pu=w1*H_dddc+w2*H_dc;
 
-toto=[];
+converge_sampling=[];
 %% Optimization problem QP
 % Sampling update
 tic
@@ -104,7 +109,7 @@ for i=1:round(max(phase_duration_cumul)/T)
 %     options=optimoptions('quadprog','Display','off');
 
     %% Optimization QP
-    [QP_result,tata,toto(i)]=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
+    [QP_result,tata,converge_sampling(i)]=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
     
     xdddc_storage=[xdddc_storage;QP_result(1)];
     ydddc_storage=[ydddc_storage;QP_result(size(A_zmp,2)/2+1)];
@@ -412,8 +417,8 @@ xz=1*xc+0*xdc-(zc-zz)./(zddc+g).*xddc;
 yz=1*yc+0*ydc-(zc-zz)./(zddc+g).*yddc;
 
 zz_up=zz;
-xz_up=1*xc+0*xdc-zeta_up_ref(1:length(zc)).*xddc;
-yz_up=1*yc+0*ydc-zeta_up_ref(1:length(zc)).*yddc;
+xz_up=[xz(1);1*xc(2:end)+0*xdc(2:end)-zeta_up_ref(1:length(zc)-1).*xddc(2:end)];
+yz_up=[yz(1);1*yc(2:end)+0*ydc(2:end)-zeta_up_ref(1:length(zc)-1).*yddc(2:end)];
 
 zz_down=zz;
 xz_down=1*xc+0*xdc-zeta_down_ref(1:length(zc)).*xddc;

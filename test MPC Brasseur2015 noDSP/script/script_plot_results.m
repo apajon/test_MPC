@@ -1,3 +1,4 @@
+no_end=16;
 % %% Plot results
 % figure(7)
 % clf
@@ -103,13 +104,13 @@ ylabel('y [m]') % y-axis label
 axis equal
 % axis image
 hold on
-plot(xc(1:length(xvcom_ref)-39),yc(1:length(xvcom_ref)-39),'-*k')
+plot(xc(1:length(xvcom_ref)-no_end),yc(1:length(xvcom_ref)-no_end),'-*k')
 legend('COM','Location','southeast')
 
-plot(xz(1:length(xvcom_ref)-39),yz(1:length(xvcom_ref)-39),'-*g')
+plot(xz(1:length(xvcom_ref)-no_end),yz(1:length(xvcom_ref)-no_end),'-*g')
 
-plot(xz_up(1:length(xvcom_ref)-39),yz_up(1:length(xvcom_ref)-39),'-*r')
-plot(xz_down(1:length(xvcom_ref)-39),yz_down(1:length(xvcom_ref)-39),'-*m')
+plot(xz_up(1:length(xvcom_ref)-no_end),yz_up(1:length(xvcom_ref)-no_end),'-*r')
+plot(xz_down(1:length(xvcom_ref)-no_end),yz_down(1:length(xvcom_ref)-no_end),'-*m')
 
 % plot(xcapture,ycapture,'-*b')
 
@@ -156,8 +157,8 @@ title('zeta')
 xlabel('t [s]') % x-axis label
 ylabel('zeta [s^2]') % y-axis label
 hold on
-plot([0:size(zeta_up_ref,1)-1]*T,zeta_up_ref)
-plot([0:size(zeta_up_ref,1)-1]*T,zeta_down_ref)
+plot([1:size(zeta_up_ref,1)]*T,zeta_up_ref)
+plot([1:size(zeta_up_ref,1)]*T,zeta_down_ref)
 plot([0:size(zeta,1)-1]*T,zeta)
 hold off
 legend('Zeta up','Zeta down','Zeta','Location','southeast')
@@ -174,8 +175,8 @@ hold on
 plot(yc(1:vcom_change),zc(1:vcom_change),'*b')
 h1=plot(yc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
 
-plot(yc(vcom_change+1:(length(xvcom_ref)-39)),zc(vcom_change+1:(length(xvcom_ref)-39)),'*r')
-h2=plot(yc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),'r');
+plot(yc(vcom_change+1:(length(xvcom_ref)-no_end)),zc(vcom_change+1:(length(xvcom_ref)-no_end)),'*r')
+h2=plot(yc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),'r');
 
 hold off
 legend([h1,h2],{['COM wth spd ' num2str(vcom_1) 'm.s-1'],['COM with spd ' num2str(vcom_2) 'm.s-1']},'Location','southeast')
@@ -371,11 +372,11 @@ switch kinematic_limit
         plot(xc(1:vcom_change),zc(1:vcom_change),'*b')
         h1=plot(xc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
 
-        plot(xc(vcom_change+1:length(xvcom_ref)-39),zc(vcom_change+1:length(xvcom_ref)-39),'*r')
-        h2=plot(xc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-39)*20),'r');
+        plot(xc(vcom_change+1:length(xvcom_ref)-no_end),zc(vcom_change+1:length(xvcom_ref)-no_end),'*r')
+        h2=plot(xc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),'r');
 
 
-        h3=plot(xc(1:length(xvcom_ref)-39),zmax(1:length(xvcom_ref)-39),'*-');
+        h3=plot(xc(1:length(xvcom_ref)-no_end),zmax(1:length(xvcom_ref)-no_end),'*-');
         h4=[];
         % for i=1:size(xstep,1)-2
         %     h4=plot([-0.52:0.01:0.52]+xstep(i),[min([-0.52:0.01:0.52]'*a+repmat(b,size([-0.52:0.01:0.52],1),1),[],2) repmat(-polyhedron_lim(end),size([-0.52:0.01:0.52]',1))],'k');
@@ -392,7 +393,7 @@ end
 
 
 %%
-%% Plot results Zeta
+%% Plot results COM velocity
 figure(14)
 clf
 title('COM velocity along x-axis')
@@ -401,6 +402,8 @@ ylabel('x com velocity [m.s^-1]') % y-axis label
 hold on
 plot([0:size(xdc,1)-1]*T,xdc)
 plot([0:size(xvcom_ref,1)-1]*T,xvcom_ref)
+temp_vcom=smooth(xvcom_ref,16);
+plot([0:size(temp_vcom,1)-1]*T,temp_vcom)
 
 hold off
 legend('COM vel','COM vel ref','Location','southeast')

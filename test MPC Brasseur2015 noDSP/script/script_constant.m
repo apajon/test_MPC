@@ -47,7 +47,7 @@ inttoankle=0.054; %from interior to ankle of foot
 sole_margin=0.02;
 
 %% Foot step placement limits
-xankmax=0.4;%stepping forward max
+xankmax=0.8;%stepping forward max
 xankmin=-0.4;%stepping forward min (if negative, it means stepping backward max)
 yankmin=2*inttoankle+0.0552;%0.15;%width min between ankles
 yankmax=2*inttoankle+0.4;%width max between ankles

@@ -303,15 +303,15 @@ for j=1:number_level-1
     end
 end
 
-surf(x*z_leg_max+0.3181, y*z_leg_max+0.081*2, z*z_leg_max+z_decalage_tot,'FaceAlpha',0.5,'EdgeColor','none');
-plot3(p_sommet{1}(1)+0.3181,p_sommet{1}(2)+0.081*2,p_sommet{1}(3),'*b')
+surf(x*z_leg_max+0.48, y*z_leg_max+0, z*z_leg_max+z_decalage_tot,'FaceAlpha',0.5,'EdgeColor','none');
+plot3(p_sommet{1}(1)+0.48,p_sommet{1}(2)+0,p_sommet{1}(3),'*b')
 for j=2:number_level
-    plot3(p_sommet{j}(1:3:end)+0.3181,p_sommet{j}(2:3:end)+0.081*2,p_sommet{j}(3:3:end),'-*b')
+    plot3(p_sommet{j}(1:3:end)+0.48,p_sommet{j}(2:3:end)+0,p_sommet{j}(3:3:end),'-*b')
 end
 
 for j=1:number_level-1
     for k=1:size(edge{j},1)
-         plot3(edge{j}(k,1:3:end)+0.3181,edge{j}(k,2:3:end)+0.081*2,edge{j}(k,3:3:end),'-r')
+         plot3(edge{j}(k,1:3:end)+0.48,edge{j}(k,2:3:end)+0,edge{j}(k,3:3:end),'-r')
     end
 end
 % %normal vector of each face

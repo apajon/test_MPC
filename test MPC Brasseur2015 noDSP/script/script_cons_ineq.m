@@ -38,11 +38,24 @@
         end
     end
     
+    if i>1 && phase_type_sampling_reduce(1)=='b'
+        if phase_type_sampling(i-1)=='r'
+            right_support(1)=true;
+        elseif phase_type_sampling(i-1)=='l'
+            left_support(1)=true;
+        end
+    end
+    
+    double_support=[];
+    if any(Px_step_ref(1+(i-1),1:2:end)==0.5,2)||any(Px_step_ref(N+(i-1),1:2:end)==0.5,2)
+        double_support=any(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==0.5,2);
+    end
+    
     [A_zmp,b_zmp]=function_constraint_convexhull(...
     Pu_z_up,Pu_z_down,Pu_step,...
     xf_z_up,xf_z_down,xf_step,...
     yf_z_up,yf_z_down,yf_step,...
-    no_double_support,right_support,left_support,...
+    no_double_support,double_support,right_support,left_support,...
     fronttoankle,backtoankle,inttoankle,exttoankle,sole_margin);
         
     %% Constraint foot step stretching
@@ -84,8 +97,8 @@
     
     % Constraint concatenation
     if i>=length(xvcom_ref)-39
-        A=[A_zmp*0;A_step_stretch];
-        b=[b_zmp*0;b_step_stretch]; 
+        A=[A_zmp;A_step_stretch];
+        b=[b_zmp;b_step_stretch]; 
     else
         A=[A_zmp;A_step_stretch];
         b=[b_zmp;b_step_stretch]; 
@@ -159,11 +172,11 @@
     end
 
 
-    A_height=[Pu_c;-Pu_c];
-    b_height=[0.9-zf_c;-0.7+zf_c];
-
-    A=[A;zeros(size(A_height,1),size(A_zmp,2)) A_height];
-    b=[b;b_height];
+%     A_height=[Pu_c;-Pu_c];
+%     b_height=[0.9-zf_c;-0.7+zf_c];
+% 
+%     A=[A;zeros(size(A_height,1),size(A_zmp,2)) A_height];
+%     b=[b;b_height];
 
 %% Constraint Last Capture point in convex hull
     no_double_support_capture=(sum(Px_step_ref==1,2)==1);
@@ -185,7 +198,7 @@
     Pu_Capture_up,Pu_Capture_down,Pu_step,...
     xf_Capture_up,xf_Capture_down,xf_step,...
     yf_Capture_up,yf_Capture_down,yf_step,...
-    no_double_support_capture,right_support_capture,left_support_capture,...
+    no_double_support_capture,[],right_support_capture,left_support_capture,...
     fronttoankle,backtoankle,inttoankle,exttoankle,sole_margin);
     
     A_Capture=[A_Capture zeros(size(A_Capture,1),size(H_c,2))];  
@@ -294,17 +307,7 @@
 %             double_support_after=[double_support_after(1:length_double_support_after-j) double_support_after(length_double_support_after-j+1) double_support_after(length_double_support_after-j+1:end)];
 %         end
 %     end
-    if phase_type_sampling_reduce(1)~='b' || (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(2)~='b') || (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(2)~='b'&&phase_type_sampling_reduce(3)~='b')
-        
-        double_support_after=find(double_support_after);
-        
-        double_support_before=logical(double_support_before+[double_support_before(2:end);false]+[double_support_before(3:end);false;false]);
-        
-        length_double_support_after=length(double_support_after);
-        for j=1:length_double_support_after
-            double_support_after=[double_support_after(1:length_double_support_after-j) double_support_after(length_double_support_after-j+1) double_support_after(length_double_support_after-j+1) double_support_after(length_double_support_after-j+1:end)];
-        end
-    end
+
     
     if isempty(Pu_step) %deal with indices of empty matrix
         Pu_step_temp=ones(sum(double_support_after),0);
