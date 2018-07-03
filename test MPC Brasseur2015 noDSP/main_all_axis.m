@@ -52,15 +52,16 @@ run('script/script_init_storage_qp_result.m')
 % w3=10^-2; %zmp wth zeta mean close to step
 % w4=10^-1; %com height
 
+%as Camille
 w1=10^-7; %jerk
 w2=10^0; %com vel ref
-w3=0*10^-2; %zmp wth zeta mean close to step
+w3=10^-1; %zmp wth zeta mean close to step
 w4=10^-2; %com height
 
-w1=10^-5; %jerk
-w2=10^0; %com vel ref
-w3=10^0; %zmp wth zeta mean close to step
-w4=10^0; %com height
+% w1=10^-5; %jerk
+% w2=10^0; %com vel ref
+% w3=10^0; %zmp wth zeta mean close to step
+% w4=10^0; %com height
 
 % w1=1.5*10^-4; %jerk
 % w2=10^0; %com vel ref

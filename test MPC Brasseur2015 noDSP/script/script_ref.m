@@ -55,6 +55,10 @@ zeta_up_ref=(hcom_ref+h_com_max-zzmp_ref+0.32)/g;
 
 zeta_down_ref=(hcom_ref+h_com_min-zzmp_ref-0.02)/g;
 
+% % zeta_up_ref(round(phase_duration(1)/T)+1:vcom_change)=(hcom_ref(round(phase_duration(1)/T)+1:vcom_change)+h_com_max-zzmp_ref(round(phase_duration(1)/T)+1:vcom_change)+0.02)/g; %m.s^-1
+% % zeta_up_ref(vcom_change+1:end-phase_duration_stop/T)=(hcom_ref(vcom_change+1:end-phase_duration_stop/T)+h_com_max-zzmp_ref(vcom_change+1:end-phase_duration_stop/T)+0.32)/g;
+% 
+% 
 % temp_=logical([]);
 % for i =1:length(phase_type_sampling)-1
 %     if phase_type_sampling(i)=='b'&& phase_type_sampling(i+1)~='b'
@@ -67,21 +71,37 @@ zeta_down_ref=(hcom_ref+h_com_min-zzmp_ref-0.02)/g;
 % zeta_up_ref(temp_)=...
 %     (hcom_ref(temp_)+...
 %     h_com_max-...
-%     zzmp_ref(temp_)-0.12)/g;
+%     zzmp_ref(temp_)+0.02)/g;
 % 
-% temp_=logical([]);
-% for i =2:length(phase_type_sampling)
-%     if phase_type_sampling(i-1)=='b'&& phase_type_sampling(i)~='b'
-%         temp_=[temp_;true];
-%     else
-%         temp_=[temp_;false];
-%     end
-% end
-% temp_=[false;temp_];
+% temp_=[false;temp_(1:end-1)];
+% 
+% % temp_=logical([]);
+% % for i =2:length(phase_type_sampling)
+% %     if phase_type_sampling(i-1)=='b'&& phase_type_sampling(i)~='b'
+% %         temp_=[temp_;true];
+% %     else
+% %         temp_=[temp_;false];
+% %     end
+% % end
+% % temp_=[false;temp_];
 % zeta_up_ref(temp_)=...
 %     (hcom_ref(temp_)+...
 %     h_com_max-...
-%     zzmp_ref(temp_)-0.12)/g;
+%     zzmp_ref(temp_)+0.02)/g;
+% 
+% temp_=[false([3 1]);temp_(1:end-3)];
+% 
+% zeta_down_ref(temp_)=...
+%     (hcom_ref(temp_)+...
+%     h_com_min-...
+%     zzmp_ref(temp_)+0.12)/g;
+% 
+% temp_=[false;temp_(1:end-1)];
+% 
+% zeta_down_ref(temp_)=...
+%     (hcom_ref(temp_)+...
+%     h_com_min-...
+%     zzmp_ref(temp_)+0.22)/g;
 
 %% foot step height ref
 zstep_l_0=zzmp_ref(1);

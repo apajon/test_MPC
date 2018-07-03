@@ -1,12 +1,21 @@
 %% Constraints inequalities
     %TODO orientation
-    translation_x=0;
-%     translation_x=xtranslate_step;
-
-%     translation_y=0;
-%     translation_y=-ytranslate_step;
-%     translation_y=ystep_l_0;
-     translation_y=0.06845;
+    
+     polyhedron_type='waist_center';
+     %'ankle_center' : polyhedron centered on the ankle
+     %'foot_center' : polyhedron centered on the middle of the foot
+     %'waist_center' : polyhedron centered on the middle of the waist    
+     switch(polyhedron_type)
+         case 'ankle_center'
+             translation_x=0;
+             translation_y=0;
+         case 'foot_center'
+             translation_x=(fronttoankle+backtoankle)/2-backtoankle;
+             translation_y=-((exttoankle+inttoankle)/2-inttoankle);
+         case 'waist_center'
+             translation_x=0;
+             translation_y=0.06845;
+     end
 %% Constraint ZMP in convex hull
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
     no_double_support=(sum(Px_step_ref==1,2)==1);
@@ -212,7 +221,7 @@
         b=[b;b_Capture]; 
     end
        
-% constraint kinematics capture point height (polyhedron)
+%% constraint kinematics capture point height (polyhedron)
     if isempty(Pu_step) %deal with indices of empty matrix
         Pu_step_temp=ones(1,0);
     else

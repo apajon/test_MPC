@@ -6,12 +6,25 @@
 xtranslate_step=0;
 ytranslate_step=(exttoankle+inttoankle)/2-inttoankle;
 
-% if i<=phase_sampling_length(2)
-%     w1=10^-1;
-% else
-%     w1=10^-5;
-% end
-% H_Pu=w1*H_dddc+w2*H_dc;
+cop_ref_type='ankle_center';
+%'ankle_center' : polyhedron centered on the ankle
+%'foot_center' : polyhedron centered on the middle of the foot  
+switch(cop_ref_type)
+    case 'ankle_center'
+        xtranslate_step=0;
+        ytranslate_step=0;
+    case 'foot_center'
+        xtranslate_step=(fronttoankle+backtoankle)/2-backtoankle;
+        ytranslate_step=(exttoankle+inttoankle)/2-inttoankle;
+    case 'waist_center'
+end
+
+if i<=phase_sampling_length(3)
+    w1=10^-1;
+else
+    w1=10^-7;
+end
+H_Pu=w1*H_dddc+w2*H_dc;
 
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
     no_double_support=(sum(Px_step_ref==1,2)==1);
@@ -88,5 +101,5 @@ if isempty(Pu_step)
 
     zf=w4*Pu_c.'*(zf_c-zzmp_ref_reduce-hcom_ref_max_reduce);
 
-    H=blkdiag(H,w4*H_c+10^-5*w1*H_dddc); % add min jerk
+    H=blkdiag(H,w4*H_c+w1*H_dddc); % add min jerk
     f=[f;zf];

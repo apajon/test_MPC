@@ -1,4 +1,5 @@
-no_end=16;
+no_begin=50;
+no_end=50;
 % %% Plot results
 % figure(7)
 % clf
@@ -157,9 +158,9 @@ title('zeta')
 xlabel('t [s]') % x-axis label
 ylabel('zeta [s^2]') % y-axis label
 hold on
-plot([1:size(zeta_up_ref,1)]*T,zeta_up_ref)
-plot([1:size(zeta_up_ref,1)]*T,zeta_down_ref)
-plot([0:size(zeta,1)-1]*T,zeta)
+plot([1:size(zeta_up_ref,1)]*T,zeta_up_ref,'-*')
+plot([1:size(zeta_up_ref,1)]*T,zeta_down_ref,'-*')
+plot([0:size(zeta,1)-1]*T,zeta,'-*')
 hold off
 legend('Zeta up','Zeta down','Zeta','Location','southeast')
 
@@ -172,8 +173,8 @@ ylabel('z [m]') % y-axis label
 axis equal
 % axis image
 hold on
-plot(yc(1:vcom_change),zc(1:vcom_change),'*b')
-h1=plot(yc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
+plot(yc(no_begin+1:vcom_change),zc(no_begin+1:vcom_change),'*b')
+h1=plot(yc_discret(no_begin*20+1:vcom_change*20),zc_discret(no_begin*20+1:vcom_change*20),'b');
 
 plot(yc(vcom_change+1:(length(xvcom_ref)-no_end)),zc(vcom_change+1:(length(xvcom_ref)-no_end)),'*r')
 h2=plot(yc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),'r');
@@ -325,12 +326,6 @@ switch kinematic_limit
         xdiff_c_step=xc-(xstep_sampling+translation_x);
         ydiff_c_step=yc-(ystep_sampling-(sign(ystep_sampling))*translation_y);
 
-
-        % a=tan(angle_successive(1:end-1)');
-        % b=[polyhedron_lim(1:end-1)./cos(angle_successive(1:end-1))]';
-
-        % z=[xdiff_c_step*a+repmat(b,size(xdiff_c_step,1),1) ydiff_c_step*a+repmat(b,size(ydiff_c_step,1),1)]+zstep_sampling;
-
         z=[];
         for i=1:size(plan_hexagon,2)
             for j=1:size(plan_hexagon{i},1)
@@ -345,17 +340,11 @@ switch kinematic_limit
         xdiff_c_step=xc-(xstep_sampling+translation_x);
         ydiff_c_step=yc-(ystep_sampling-(sign(ystep_sampling))*translation_y);
 
-
-        % a=tan(angle_successive(1:end-1)');
-        % b=[polyhedron_lim(1:end-1)./cos(angle_successive(1:end-1))]';
-        % 
-        % z=[z [xdiff_c_step*a+repmat(b,size(xdiff_c_step,1),1) ydiff_c_step*a+repmat(b,size(ydiff_c_step,1),1)]+zstep_sampling];
-
-        for i=1:size(plan_hexagon,2)
-            for j=1:size(plan_hexagon{i},1)
-                z=[z -(plan_hexagon{i}(j,1)*xdiff_c_step+plan_hexagon{i}(j,2)*ydiff_c_step+plan_hexagon{i}(j,4))/plan_hexagon{i}(j,3)];
-            end
-        end
+%         for i=1:size(plan_hexagon,2)
+%             for j=1:size(plan_hexagon{i},1)
+%                 z=[z -(plan_hexagon{i}(j,1)*xdiff_c_step+plan_hexagon{i}(j,2)*ydiff_c_step+plan_hexagon{i}(j,4))/plan_hexagon{i}(j,3)];
+%             end
+%         end
 
         z=z+zstep_sampling;
 
