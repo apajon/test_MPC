@@ -1,4 +1,12 @@
 %% update cost function
+% min com pos to ref
+H_c=Pu_c.'*Pu_c;
+% min com vel to ref
+H_dc=Pu_dc.'*Pu_dc;
+
+% min com Jerk
+H_dz=eye(N);
+
 %%
 % add min(zeta_mean-foot_step)
 % add variable part of min(com_vel-com_vel_ref)
@@ -19,43 +27,42 @@ switch(cop_ref_type)
     case 'waist_center'
 end
 
-if i<=phase_sampling_length(3)
-    w1=10^-1;
-else
-    w1=10^-7;
-end
-
+% if i<=phase_sampling_length(3)
+%     w1=10^-1;
+% else
+%     w1=10^-7;
+% end
 H_Pu=w1*H_dz+w2*H_dc;
 
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
-    no_double_support=(sum(Px_step_ref==1,2)==1);
-    no_double_support=no_double_support(1+(i-1):N+(i-1),:);
+no_double_support=(sum(Px_step_ref==1,2)==1);
+no_double_support=no_double_support(1+(i-1):N+(i-1),:);
     
 %     right_support=any(phase_type_sampling_reduce=='r',2);
 %     left_support=any(phase_type_sampling_reduce=='l',2);
-    if phase_type(2)=='r'
-        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        else
-            right_support=false(size(no_double_support));
-            left_support=false(size(no_double_support));
-        end
-    elseif phase_type(2)=='l'
-        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        else
-            right_support=false(size(no_double_support));
-            left_support=false(size(no_double_support));
-        end
+if phase_type(2)=='r'
+    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+    else
+        right_support=false(size(no_double_support));
+        left_support=false(size(no_double_support));
     end
+elseif phase_type(2)=='l'
+    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+    else
+        right_support=false(size(no_double_support));
+        left_support=false(size(no_double_support));
+    end
+end
 
 
 if isempty(Pu_step)
@@ -87,11 +94,11 @@ if isempty(Pu_step)
     
 %%
 %add Cost com heigth and min jerk
-    zf_c=Px_c*[zc(i);zdc(i);zddc(i)];
+zf_c=Px_c*[zc(i);zdc(i);zddc(i)];
 
-    zzmp_ref_reduce=zzmp_ref(1+(i-1):N+(i-1),:);
-    hcom_ref_reduce=hcom_ref(1+(i-1):N+(i-1),:);
-    hcom_ref_max_reduce=hcom_ref_max(1+(i-1):N+(i-1),:);
+zzmp_ref_reduce=zzmp_ref(1+(i-1):N+(i-1),:);
+hcom_ref_reduce=hcom_ref(1+(i-1):N+(i-1),:);
+hcom_ref_max_reduce=hcom_ref_max(1+(i-1):N+(i-1),:);
 %     if i<10
 %         hcom_ref_reduce=0.8;
 %     elseif i<120
@@ -100,7 +107,7 @@ if isempty(Pu_step)
 %         hcom_ref_reduce=0.8;
 %     end
 
-    zf=w4*Pu_c.'*(zf_c-zzmp_ref_reduce-hcom_ref_max_reduce);
+zf=w4*Pu_c.'*(zf_c-hcom_ref_max_reduce);
 
-    H=blkdiag(H,w4*H_c+w1*H_dz); % add min jerk
-    f=[f;zf];
+H=blkdiag(H,w4*H_c+w1*H_dz); % add min jerk
+f=[f;zf];

@@ -4,10 +4,12 @@ clc
 
 addpath script/ function/
 
-walking_type=1;
+walking_type=4;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
+% 4 : walking flat fixed foot step positions
+% 5 : walking airbus stairs fixed foot step positions
 
 save_figure=false;
 
@@ -21,12 +23,12 @@ run('script/script_phase_duration.m')
 run('script/script_ref.m')
 
 %% ZMP COM Linear form
-COM_form='com jerk'
+COM_form='zmp vel'
 %'com jerk' : COM with piece-wise jerk
 %'zmp vel' : ZMP with piece-wise velocity
 switch(COM_form)
     case 'com jerk'
-        run('script/script_zmp_com_linear_form_comJerk.m')
+%        run('script/script_zmp_com_linear_form_comJerk.m')
     case 'zmp vel'
 end
 
@@ -62,6 +64,12 @@ run('script/script_init_storage_qp_result.m')
 %as Camille
 w1=10^-7; %jerk
 w2=10^0; %com vel ref
+switch(walking_type)
+    case {1,2,3}
+        w2=10^0; %com vel ref
+    case {4,5}
+        w2=10^0*0; %com vel ref
+end
 w3=10^-1; %zmp wth zeta mean close to step
 w4=10^-2; %com height
 
@@ -75,37 +83,34 @@ w4=10^-2; %com height
 % w3=10^0; %zmp wth zeta mean close to step
 % w4=10^0; %com height
 
-switch(COM_form)
-    case 'com jerk'
-        % min Jerk
-        H_dddc=eye(N);
-
-        % min com vel to ref
-        H_dc=Pu_dc.'*Pu_dc;
-
-        % min com pos to ref
-        H_c=Pu_c.'*Pu_c;
-
-        % Cost pre-concatenate
-        H_Pu=w1*H_dddc+w2*H_dc;
-    case 'zmp vel'
-        H_dz=eye(N);
-end
+% switch(COM_form)
+%     case 'com jerk'
+%         % min Jerk
+%         H_dddc=eye(N);
+% 
+%     case 'zmp vel'
+%         H_dz=eye(N);
+% end
 
 
 converge_sampling=[];
 %% Optimization problem QP
 % Sampling update
 tic
-for i=1:round(max(phase_duration_cumul)/T)
+for i=1:phase_duration_iteration_cumul(end)
     i
-    %% Initialization from last robot COM state
-    switch(COM_form)
-        case 'com jerk'
-            run('script/script_initialize_from_com_state_comJerk.m')
-        case 'zmp vel'
-            run('script/script_initialize_from_com_state_zmpVel.m')
+    if i>=55
+        i
     end
+    
+    N=1;
+    t=phase_duration_sampling(i);
+    while(t<preview_windows_duration)
+        t=t+phase_duration_sampling(i+N);
+        N=N+1;
+    end
+    %% Initialization from last robot COM state
+    run('script/script_initialize_from_com_state.m')
     
     
     %% Foot step ref
@@ -121,22 +126,22 @@ for i=1:round(max(phase_duration_cumul)/T)
     
     
     %% Constraint Inequalities
-    switch(COM_form)
-        case 'com jerk'
-            run('script/script_cons_ineq_comJerk.m')
-        case 'zmp vel'
-            run('script/script_cons_ineq_zmpVel.m')
-    end
-    
+%     switch(COM_form)
+%         case 'com jerk'
+%             run('script/script_cons_ineq_comJerk.m')
+%         case 'zmp vel'
+%             run('script/script_cons_ineq_zmpVel.m')
+%     end
+    run('script/script_cons_ineq_zmpVel.m')
     
     %% Constraint Equalities
-    switch(COM_form)
-        case 'com jerk'
-            run('script/script_cons_eq_comJerk.m')
-        case 'zmp vel'
-            run('script/script_cons_eq_zmpVel.m')
-    end
-    
+%     switch(COM_form)
+%         case 'com jerk'
+%             run('script/script_cons_eq_comJerk.m')
+%         case 'zmp vel'
+%             run('script/script_cons_eq_zmpVel.m')
+%     end
+    run('script/script_cons_eq_comJerk.m')
     
     %% constraints
     lb=[];ub=[];x0=[];
@@ -156,17 +161,17 @@ for i=1:round(max(phase_duration_cumul)/T)
             zdddc_storage=[zdddc_storage;QP_result(size(A_zmp,2)+1)];
 
             %% Results COM
-            xc(i+1)=[1 T T^2/2]*[xc(i);xdc(i);xddc(i)]+T^3/6*xdddc_storage(end);
-            xdc(i+1)=[0 1 T]*[xc(i);xdc(i);xddc(i)]+T^2/2*xdddc_storage(end);
-            xddc(i+1)=[0 0 1]*[xc(i);xdc(i);xddc(i)]+T*xdddc_storage(end);
+            xc(i+1,1)=xf_c(1,:)+Pu_c(1,1)*xdddc_storage(end);
+            xdc(i+1,1)=xf_dc(1,:)+Pu_dc(1,1)*xdddc_storage(end);
+            xddc(i+1,1)=xf_ddc(1,:)+Pu_ddc(1,1)*xdddc_storage(end);
 
-            yc(i+1)=[1 T T^2/2]*[yc(i);ydc(i);yddc(i)]+T^3/6*ydddc_storage(end);
-            ydc(i+1)=[0 1 T]*[yc(i);ydc(i);yddc(i)]+T^2/2*ydddc_storage(end);
-            yddc(i+1)=[0 0 1]*[yc(i);ydc(i);yddc(i)]+T*ydddc_storage(end);
+            yc(i+1,1)=yf_c(1,:)+Pu_c(1,1)*ydddc_storage(end);
+            ydc(i+1,1)=yf_dc(1,:)+Pu_dc(1,1)*ydddc_storage(end);
+            yddc(i+1,1)=yf_ddc(1,:)+Pu_ddc(1,1)*ydddc_storage(end);
 
-            zc(i+1)=[1 T T^2/2]*[zc(i);zdc(i);zddc(i)]+T^3/6*zdddc_storage(end);
-            zdc(i+1)=[0 1 T]*[zc(i);zdc(i);zddc(i)]+T^2/2*zdddc_storage(end);
-            zddc(i+1)=[0 0 1]*[zc(i);zdc(i);zddc(i)]+T*zdddc_storage(end);
+            zc(i+1,1)=zf_c(1,:)+Pu_c(1,1)*zdddc_storage(end);
+            zdc(i+1,1)=zf_dc(1,:)+Pu_dc(1,1)*zdddc_storage(end);
+            zddc(i+1,1)=zf_ddc(1,:)+Pu_ddc(1,1)*zdddc_storage(end);
 
 
             %%
@@ -179,35 +184,35 @@ for i=1:round(max(phase_duration_cumul)/T)
             zdddc_storage=[zdddc_storage;QP_result(size(A_zmp,2)+1)];
             
             %%
-            xc(i+1)=xf_c(1,:)+Pu_c(1,1)*xdddc_storage(end);
-            xdc(i+1)=xf_dc(1,:)+Pu_dc(1,1)*xdddc_storage(end);
-            xddc(i+1)=xf_ddc(1,:)+Pu_ddc(1,1)*xdddc_storage(end);
+            xc(i+1,1)=xf_c(1,:)+Pu_c(1,1)*xdddc_storage(end);
+            xdc(i+1,1)=xf_dc(1,:)+Pu_dc(1,1)*xdddc_storage(end);
+            xddc(i+1,1)=xf_ddc(1,:)+Pu_ddc(1,1)*xdddc_storage(end);
 
-            yc(i+1)=yf_c(1,:)+Pu_c(1,1)*ydddc_storage(end);
-            ydc(i+1)=yf_dc(1,:)+Pu_dc(1,1)*ydddc_storage(end);
-            yddc(i+1)=yf_ddc(1,:)+Pu_ddc(1,1)*ydddc_storage(end);
+            yc(i+1,1)=yf_c(1,:)+Pu_c(1,1)*ydddc_storage(end);
+            ydc(i+1,1)=yf_dc(1,:)+Pu_dc(1,1)*ydddc_storage(end);
+            yddc(i+1,1)=yf_ddc(1,:)+Pu_ddc(1,1)*ydddc_storage(end);
 
-            zc(i+1)=zf_c(1,:)+Pu_c(1,1)*zdddc_storage(end);
-            zdc(i+1)=zf_dc(1,:)+Pu_dc(1,1)*zdddc_storage(end);
-            zddc(i+1)=zf_ddc(1,:)+Pu_ddc(1,1)*zdddc_storage(end);
+            zc(i+1,1)=zf_c(1,:)+Pu_c(1,1)*zdddc_storage(end);
+            zdc(i+1,1)=zf_dc(1,:)+Pu_dc(1,1)*zdddc_storage(end);
+            zddc(i+1,1)=zf_ddc(1,:)+Pu_ddc(1,1)*zdddc_storage(end);
 
     end    
     
-    if phase_type_sampling_reduce(1)~='b' && phase_type_sampling_reduce(2)=='b'
-    xstep=[xstep;QP_result(17)];
-    ystep=[ystep;QP_result(size(A_zmp,2)/2+17)];
-    zstep=[zstep;zzmp_ref_reduce(3)];
+    if (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(1)~="start"&&phase_type_sampling_reduce(1)~="stop") && (phase_type_sampling_reduce(2)=='b'||phase_type_sampling_reduce(2)=="start"||phase_type_sampling_reduce(2)=="stop")
+        xstep=[xstep;QP_result(N+1)];
+        ystep=[ystep;QP_result(size(A_zmp,2)/2+N+1)];
+        zstep=[zstep;zzmp_ref_reduce(3)];
     end      
 
     figure(1)
     clf
     hold on
-    plot([0:i]*T,xc(1:i+1),'b')
-    plot([i:i+15]*T,xf_c+Pu_c*QP_result(1:16),'r')
-    plot([0:i]*T,yc(1:i+1),'b')
-    plot([i:i+15]*T,yf_c+Pu_c*QP_result(size(A_zmp,2)/2+1:size(A_zmp,2)/2+16),'r')
-    plot([0:i]*T,zc(1:i+1),'b')
-    plot([i:i+15]*T,zf_c+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+16),'r')
+    plot([0;phase_duration_sampling_cumul(1:i)],xc(1:i+1),'b')
+    plot(phase_duration_sampling_cumul(i:i+N-1),xf_c+Pu_c*QP_result(1:N),'r')
+    plot([0;phase_duration_sampling_cumul(1:i)],yc(1:i+1),'b')
+    plot(phase_duration_sampling_cumul(i:i+N-1),yf_c+Pu_c*QP_result(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),'r')
+    plot([0;phase_duration_sampling_cumul(1:i)],zc(1:i+1),'b')
+    plot(phase_duration_sampling_cumul(i:i+N-1),zf_c+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+N),'r')
     hold off
 end
 toc
@@ -246,7 +251,7 @@ pstep_3d=[pstep zstep];
 pstep_3d_phase_r=[];
 pstep_3d_phase_l=[];
 for i=1:length(phase_type)
-    if phase_type(i)=='b'
+    if phase_type(i)=='b'||phase_type(i)=='start'||phase_type(i)=='stop'
         if i<length(phase_type)
             if phase_type(i+1)=='r'
                 pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(2,:);];
@@ -270,11 +275,13 @@ for i=1:length(phase_type)
         pstep_3d_phase_l=[pstep_3d_phase_l;...
             [(pstep_3d_phase_l(end,1:2)+pstep_3d(2,1:2))./2 max(pstep_3d_phase_l(end,3),pstep_3d(2,3))+hstep_move];...
             pstep_3d(2,:);];
-    else
+    elseif phase_type(i)=='l'
         pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);pstep_3d(1,:);];
         pstep_3d_phase_r=[pstep_3d_phase_r;...
             [(pstep_3d_phase_r(end,1:2)+pstep_3d(2,1:2))./2 max(pstep_3d_phase_r(end,3),pstep_3d(2,3))+hstep_move];...
              pstep_3d(2,:);];
+    else
+        error('Unkown phase type')
     end
 end
 %%
@@ -308,9 +315,9 @@ end
 %%
 phase_type_enlarge=ones(length(phase_type) + length(phase_type(2:2:end)),1);
 phase_type_enlarge(:) = nan;
-phase_type_enlarge(3:3:end,:)=phase_type(2:2:end,:);
+phase_type_enlarge(3:3:end,:)=char(phase_type(2:2:end,:));
 locations = any(isnan(phase_type_enlarge),2);
-phase_type_enlarge(locations) = phase_type;
+phase_type_enlarge(locations) = ['b';char(phase_type(2:end-1));'b'];
 phase_type_enlarge=char(phase_type_enlarge);
 
 phase_duration_enlarge=zeros(length(phase_type_enlarge),1);
@@ -416,12 +423,6 @@ aankle_r=mdddt*A_f_r;
 
 switch(COM_form)
         case 'com jerk'
-            t=[[1/frequency:1/frequency:T]' [(1/frequency:1/frequency:T).^2./2]'];
-            t=[ones(size(t,1),1) t];
-            dt=[zeros(size(t,1),1) ones(size(t,1),1) [1/frequency:1/frequency:T]'];
-            ddt=[zeros(size(t,1),1) zeros(size(t,1),1) ones(size(t,1),1)];
-            dddt=[(1/frequency:1/frequency:T)]';
-
             xc_discret=[xc(1)];
             xdc_discret=[xc(1)];
             xddc_discret=[xc(1)];
@@ -434,6 +435,13 @@ switch(COM_form)
             zdc_discret=[zc(1)];
             zddc_discret=[zc(1)];
             for i=1:size(xdddc_storage,1)
+                t=[[1/frequency:1/frequency:phase_duration_sampling(i)]' [(1/frequency:1/frequency:phase_duration_sampling(i)).^2./2]'];
+                t=[ones(size(t,1),1) t];
+                dt=[zeros(size(t,1),1) ones(size(t,1),1) [1/frequency:1/frequency:phase_duration_sampling(i)]'];
+                ddt=[zeros(size(t,1),1) zeros(size(t,1),1) ones(size(t,1),1)];
+                dddt=[(1/frequency:1/frequency:phase_duration_sampling(i))]';
+                
+                
                 xc_discret=[xc_discret;t*[xc(i);xdc(i);xddc(i)]+dddt.^3/6*xdddc_storage(i)];
                 xdc_discret=[xdc_discret;dt*[xc(i);xdc(i);xddc(i)]+dddt.^2/2*xdddc_storage(i)];
                 xddc_discret=[xddc_discret;ddt*[xc(i);xdc(i);xddc(i)]+dddt*xdddc_storage(i)];
@@ -447,12 +455,6 @@ switch(COM_form)
                 zddc_discret=[zddc_discret;ddt*[zc(i);zdc(i);zddc(i)]+dddt*zdddc_storage(i)];
             end
         case 'zmp vel'
-            t=[sinh(omega_temp*[1/frequency:1/frequency:T]')/omega_temp (cosh(omega_temp*[1/frequency:1/frequency:T]')-1)/omega_temp^2];
-            t=[ones(size(t,1),1) t];            
-            dt=[zeros(size(t,1),1) cosh(omega_temp*[1/frequency:1/frequency:T]') sinh(omega_temp*[1/frequency:1/frequency:T]')/omega_temp];
-            ddt=[zeros(size(t,1),1) omega_temp*sinh(omega_temp*[1/frequency:1/frequency:T]') cosh(omega_temp*[1/frequency:1/frequency:T]')];
-            dddt=[-sinh(omega_temp*[1/frequency:1/frequency:T]')/omega_temp+[1/frequency:1/frequency:T]' -cosh(omega_temp*[1/frequency:1/frequency:T]')+1 -omega_temp*sinh(omega_temp*[1/frequency:1/frequency:T]')];
-
             xc_discret=[xc(1)];
             xdc_discret=[xc(1)];
             xddc_discret=[xc(1)];
@@ -465,6 +467,13 @@ switch(COM_form)
             zdc_discret=[zc(1)];
             zddc_discret=[zc(1)];
             for i=1:size(xdddc_storage,1)
+                t=[sinh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')/omega_temp (cosh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')-1)/omega_temp^2];
+                t=[ones(size(t,1),1) t];            
+                dt=[zeros(size(t,1),1) cosh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]') sinh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')/omega_temp];
+                ddt=[zeros(size(t,1),1) omega_temp*sinh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]') cosh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')];
+                dddt=[-sinh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')/omega_temp+[1/frequency:1/frequency:phase_duration_sampling(i)]' -cosh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')+1 -omega_temp*sinh(omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]')];
+
+            
                 xc_discret=[xc_discret;t*[xc(i);xdc(i);xddc(i)]+dddt(:,1)*xdddc_storage(i)];
                 xdc_discret=[xdc_discret;dt*[xc(i);xdc(i);xddc(i)]+dddt(:,2)*xdddc_storage(i)];
                 xddc_discret=[xddc_discret;ddt*[xc(i);xdc(i);xddc(i)]+dddt(:,3)*xdddc_storage(i)];
@@ -481,10 +490,24 @@ switch(COM_form)
 
 
 zzmp_ref_discret=zeros(round(max(phase_duration_cumul)*frequency),1);
-zzmp_ref_discret(round(phase_duration_cumul(3)*frequency)+1:round(phase_duration_cumul(5)*frequency))=0.05;
-zzmp_ref_discret(round(phase_duration_cumul(5)*frequency)+1:round(phase_duration_cumul(7)*frequency))=0.1;
-zzmp_ref_discret(round(phase_duration_cumul(7)*frequency)+1:round(phase_duration_cumul(9)*frequency))=0.15;
-zzmp_ref_discret(round(phase_duration_cumul(9)*frequency)+1:end)=0.2;
+switch(walking_type)
+    case 1
+    case 2
+        zzmp_ref_discret(round(phase_duration_cumul(5)*frequency)+1:round(phase_duration_cumul(7)*frequency))=0.195+0.18*0;
+        zzmp_ref_discret(round(phase_duration_cumul(7)*frequency)+1:round(phase_duration_cumul(9)*frequency))=0.195+0.18*1;
+        zzmp_ref_discret(round(phase_duration_cumul(9)*frequency)+1:round(phase_duration_cumul(11)*frequency))=0.195+0.18*2;
+        zzmp_ref_discret(round(phase_duration_cumul(11)*frequency)+1:round(phase_duration_cumul(13)*frequency))=0.195+0.18*3;
+        zzmp_ref_discret(round(phase_duration_cumul(13)*frequency)+1:end)=0.195+0.18*3+0.145;
+    case 3
+    case 4
+    case 5
+        zzmp_ref_discret(round(phase_duration_cumul(5)*frequency)+1:round(phase_duration_cumul(7)*frequency))=0.195+0.18*0;
+        zzmp_ref_discret(round(phase_duration_cumul(7)*frequency)+1:round(phase_duration_cumul(9)*frequency))=0.195+0.18*1;
+        zzmp_ref_discret(round(phase_duration_cumul(9)*frequency)+1:round(phase_duration_cumul(11)*frequency))=0.195+0.18*2;
+        zzmp_ref_discret(round(phase_duration_cumul(11)*frequency)+1:round(phase_duration_cumul(13)*frequency))=0.195+0.18*3;
+        zzmp_ref_discret(round(phase_duration_cumul(13)*frequency)+1:end)=0.195+0.18*3+0.145;
+end
+
 % zz=[zzmp_ref(1);zzmp_ref(1:end-1)];
 % zz(length(zc)+1:end)=[];
 zz_discret=[zzmp_ref_discret(1);zzmp_ref_discret(1:end)];

@@ -22,8 +22,7 @@ Aeq=[];beq=[];
 % Aeq_zc=[zeros(1,size(Pu_c,2)) zeros(1,size(Pu_step,2)) zeros(1,size(Pu_c,2)) zeros(1,size(Pu_step,2)) Pu_c(end,:)];
 % beq_zc=h_com+zzmp_ref_reduce(end)-Px_c(end,:)*[zc(i);zdc(i);zddc(i)];
 
-% zeta_final=(zeta_up_ref(i+16)+zeta_down_ref(i+16))/2;
-zeta_final=h_com/g;
+zeta_final=(zeta_up_ref(i+16)+zeta_down_ref(i+16))/2;
 w_final=1/sqrt(zeta_final);
 
 Aeq_diff_dc_ddc=[w_final*Pu_dc(end,:)+Pu_ddc(end,:) zeros(1,size(Pu_step,2)) zeros(1,size(Pu_dc,2)) zeros(1,size(Pu_step,2)) zeros(1,size(H_c,2));...
@@ -33,9 +32,3 @@ beq_diff_dc_ddc=[-xf_dc(end);-yf_dc(end);-Px_dc(end,:)*[zc(i);zdc(i);zddc(i)]]*w
 
 Aeq=Aeq_diff_dc_ddc;
 beq=beq_diff_dc_ddc;
-
-%% Manage fixed foot step position
-[A_fixed_step,b_fixed_step]=pankle_fixed_path(size(xstep,1),N,size(Pu_step,2),step_number_pankle_fixed);
-
-Aeq=[Aeq;A_fixed_step];
-beq=[beq;b_fixed_step];

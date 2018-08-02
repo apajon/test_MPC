@@ -1,3 +1,7 @@
+    if i==56
+        i
+    end
+
 %% Constraints inequalities
     %TODO orientation
     

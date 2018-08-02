@@ -24,10 +24,10 @@
 %     right_support=any(phase_type_sampling_reduce=='r',2);
 %     left_support=any(phase_type_sampling_reduce=='l',2);
     if phase_type(2)=='r'
-        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='r'
             left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
             right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='l'
             right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
             left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
         else
@@ -35,10 +35,10 @@
             left_support=false(size(no_double_support));
         end
     elseif phase_type(2)=='l'
-        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+        if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='r'
             right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
             left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+        elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='l'
             left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
             right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
         else
@@ -47,7 +47,7 @@
         end
     end
     
-    if i>1 && phase_type_sampling_reduce(1)=='b'
+    if i>1 && (phase_type_sampling_reduce(1)=='b'|phase_type_sampling_reduce(1)=="start"|phase_type_sampling_reduce(1)=="stop")
         if phase_type_sampling(i-1)=='r'
             right_support(1)=true;
         elseif phase_type_sampling(i-1)=='l'
@@ -81,9 +81,11 @@
         A_step_stretch=blkdiag(A_step_stretch,A_step_stretch);
         
         %%%
-        phase_type_nodouble_reduce=phase_type_reduce(any(phase_type_reduce~='b',2));
+        phase_type_nodouble_reduce=phase_type_reduce(any(phase_type_reduce~='b'&phase_type_reduce~="start"&phase_type_reduce~="stop",2));
+%         phase_type_nodouble_reduce=phase_type_nodouble_reduce(any(phase_type_nodouble_reduce~="start",2));
+%         phase_type_nodouble_reduce=phase_type_nodouble_reduce(any(phase_type_nodouble_reduce~="stop",2));
         
-        if phase_type_reduce(end)=='b' && Pu_step(end,end)==0.5
+        if phase_type_reduce(end)=="stop" && Pu_step(end,end)==0.5
             if phase_type_nodouble_reduce(end)=='r'
                 phase_type_nodouble_reduce(end+1)='l';
             else
@@ -192,10 +194,10 @@
     no_double_support_capture=no_double_support_capture(1+(i-1):N+(i-1),:);
     no_double_support_capture(1:end-1,:)=[no_double_support_capture(1:end-1,:)==2];
 
-    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
+    if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='r'
         right_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
         left_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
+    elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='l'
         right_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
         left_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
     else
@@ -301,7 +303,7 @@
         b=[b;b_diff_capture_p_up];
     end
      
-%% constraint kinematics COM height (polyhedron) in DSP
+%% constraint kinematics COM height (polyhedron) beforte and after DSP
     double_support_before=[any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2);false];
     double_support_after=[false;any([phase_type_sampling_reduce(1:end-1)=='b']+[phase_type_sampling_reduce(2:end)~='b']==2,2)];
     

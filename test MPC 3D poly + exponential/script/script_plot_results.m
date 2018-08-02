@@ -1,5 +1,5 @@
 no_begin=50;
-no_end=50;
+no_end=24+14;
 % %% Plot results
 % figure(7)
 % clf
@@ -95,6 +95,8 @@ end
 hold off
 legend('COM','CoP','CoP up','CoP down','Capture point','Location','southeast')
 
+
+
 %% Plot results top view
 figure(13)
 clf
@@ -158,9 +160,10 @@ title('zeta')
 xlabel('t [s]') % x-axis label
 ylabel('zeta [s^2]') % y-axis label
 hold on
-plot([1:size(zeta_up_ref,1)]*T,zeta_up_ref,'-*')
-plot([1:size(zeta_up_ref,1)]*T,zeta_down_ref,'-*')
-plot([0:size(zeta,1)-1]*T,zeta,'-*')
+plot(phase_duration_sampling_cumul,zeta_up_ref,'-*')
+plot(phase_duration_sampling_cumul,zeta_down_ref,'-*')
+plot([0;phase_duration_sampling_cumul(1:size(zeta)-1)],zeta,'*')
+plot([0:size(zc_discret,1)-1]*0.005,(zc_discret-zz_discret*0)./(zddc_discret+g),'-')
 hold off
 legend('Zeta up','Zeta down','Zeta','Location','southeast')
 
@@ -174,10 +177,10 @@ axis equal
 % axis image
 hold on
 plot(yc(no_begin+1:vcom_change),zc(no_begin+1:vcom_change),'*b')
-h1=plot(yc_discret(no_begin*20+1:vcom_change*20),zc_discret(no_begin*20+1:vcom_change*20),'b');
+h1=plot(yc_discret(no_begin*20+1:round(end/2)+5*20),zc_discret(no_begin*20+1:round(end/2)+5*20),'b');
 
 plot(yc(vcom_change+1:(length(xvcom_ref)-no_end)),zc(vcom_change+1:(length(xvcom_ref)-no_end)),'*r')
-h2=plot(yc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),'r');
+h2=plot(yc_discret(round(end/2)+5*20:end-no_end*20),zc_discret(round(end/2)+5*20:end-no_end*20),'r');
 
 hold off
 legend([h1,h2],{['COM wth spd ' num2str(vcom_1) 'm.s-1'],['COM with spd ' num2str(vcom_2) 'm.s-1']},'Location','southeast')
@@ -359,10 +362,10 @@ switch kinematic_limit
 %         axis square
         hold on
         plot(xc(1:vcom_change),zc(1:vcom_change),'*b')
-        h1=plot(xc_discret(1:vcom_change*20),zc_discret(1:vcom_change*20),'b');
+        h1=plot(xc_discret(1:round(end/2)+5*20),zc_discret(1:round(end/2)+5*20),'b');
 
         plot(xc(vcom_change+1:length(xvcom_ref)-no_end),zc(vcom_change+1:length(xvcom_ref)-no_end),'*r')
-        h2=plot(xc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),zc_discret(vcom_change*20+1:(length(xvcom_ref)-no_end)*20),'r');
+        h2=plot(xc_discret(round(end/2)+5*20:end-no_end*20),zc_discret(round(end/2)+5*20:end-no_end*20),'r');
 
 
         h3=plot(xc(1:length(xvcom_ref)-no_end),zmax(1:length(xvcom_ref)-no_end),'*-');
@@ -389,10 +392,10 @@ title('COM velocity along x-axis')
 xlabel('t [s]') % x-axis label
 ylabel('x com velocity [m.s^-1]') % y-axis label
 hold on
-plot([0:size(xdc,1)-1]*T,xdc)
-plot([0:size(xvcom_ref,1)-1]*T,xvcom_ref)
+plot([0;phase_duration_sampling_cumul(1:size(xdc,1)-1)],xdc)
+plot([0;phase_duration_sampling_cumul(1:size(xvcom_ref,1)-1)],xvcom_ref)
 temp_vcom=smooth(xvcom_ref,16);
-plot([0:size(temp_vcom,1)-1]*T,temp_vcom)
+plot([0;phase_duration_sampling_cumul(1:size(temp_vcom,1)-1)],temp_vcom)
 
 hold off
 legend('COM vel','COM vel ref','Location','southeast')
