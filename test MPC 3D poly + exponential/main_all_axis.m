@@ -4,7 +4,7 @@ clc
 
 addpath script/ function/
 
-walking_type=4;
+walking_type=1;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
@@ -94,6 +94,19 @@ w4=10^-2; %com height
 
 
 converge_sampling=[];
+QP_result_all=[];
+movie_record=false;
+if movie_record  
+    v_COM = VideoWriter('COM_MPC.avi');
+    v_COM.Quality = 95;
+    v_COM.FrameRate=10;
+    open(v_COM);
+    
+    v_CoP = VideoWriter('CoP_MPC.avi');
+    v_CoP.Quality = 95;
+    v_CoP.FrameRate=10;
+    open(v_CoP);
+end
 %% Optimization problem QP
 % Sampling update
 tic
@@ -152,13 +165,13 @@ for i=1:phase_duration_iteration_cumul(end)
 %     options=optimoptions('quadprog','Display','off');
 
     %% Optimization QP
-    [QP_result,tata,converge_sampling(i)]=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
+    [QP_result_all{i},tata,converge_sampling(i)]=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
 
     switch(COM_form)
         case 'com jerk'
-            xdddc_storage=[xdddc_storage;QP_result(1)];
-            ydddc_storage=[ydddc_storage;QP_result(size(A_zmp,2)/2+1)];
-            zdddc_storage=[zdddc_storage;QP_result(size(A_zmp,2)+1)];
+            xdddc_storage=[xdddc_storage;QP_result_all{i}(1)];
+            ydddc_storage=[ydddc_storage;QP_result_all{i}(size(A_zmp,2)/2+1)];
+            zdddc_storage=[zdddc_storage;QP_result_all{i}(size(A_zmp,2)+1)];
 
             %% Results COM
             xc(i+1,1)=xf_c(1,:)+Pu_c(1,1)*xdddc_storage(end);
@@ -179,9 +192,9 @@ for i=1:phase_duration_iteration_cumul(end)
                 run('script/script_display_online.m')
             end 
         case 'zmp vel'
-            xdddc_storage=[xdddc_storage;QP_result(1)];
-            ydddc_storage=[ydddc_storage;QP_result(size(A_zmp,2)/2+1)];
-            zdddc_storage=[zdddc_storage;QP_result(size(A_zmp,2)+1)];
+            xdddc_storage=[xdddc_storage;QP_result_all{i}(1)];
+            ydddc_storage=[ydddc_storage;QP_result_all{i}(size(A_zmp,2)/2+1)];
+            zdddc_storage=[zdddc_storage;QP_result_all{i}(size(A_zmp,2)+1)];
             
             %%
             xc(i+1,1)=xf_c(1,:)+Pu_c(1,1)*xdddc_storage(end);
@@ -199,23 +212,63 @@ for i=1:phase_duration_iteration_cumul(end)
     end    
     
     if (phase_type_sampling_reduce(1)~='b'&&phase_type_sampling_reduce(1)~="start"&&phase_type_sampling_reduce(1)~="stop") && (phase_type_sampling_reduce(2)=='b'||phase_type_sampling_reduce(2)=="start"||phase_type_sampling_reduce(2)=="stop")
-        xstep=[xstep;QP_result(N+1)];
-        ystep=[ystep;QP_result(size(A_zmp,2)/2+N+1)];
+        xstep=[xstep;QP_result_all{i}(N+1)];
+        ystep=[ystep;QP_result_all{i}(size(A_zmp,2)/2+N+1)];
         zstep=[zstep;zzmp_ref_reduce(3)];
     end      
-
-    figure(1)
-    clf
-    hold on
-    plot([0;phase_duration_sampling_cumul(1:i)],xc(1:i+1),'b')
-    plot(phase_duration_sampling_cumul(i:i+N-1),xf_c+Pu_c*QP_result(1:N),'r')
-    plot([0;phase_duration_sampling_cumul(1:i)],yc(1:i+1),'b')
-    plot(phase_duration_sampling_cumul(i:i+N-1),yf_c+Pu_c*QP_result(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),'r')
-    plot([0;phase_duration_sampling_cumul(1:i)],zc(1:i+1),'b')
-    plot(phase_duration_sampling_cumul(i:i+N-1),zf_c+Pu_c*QP_result(size(A_zmp,2)+1:size(A_zmp,2)+N),'r')
-    hold off
+    
+%     figure(1)
+%     clf
+%     title('MPC COM trajectory')
+%     xlabel('t [s]') % x-axis label
+%     ylabel('position [m]') % y-axis label
+%     axis([0 16 -0.5 4])
+%     hold on
+%     plot([0;phase_duration_sampling_cumul(1:i)],xc(1:i+1),'b')
+%     plot([0;phase_duration_sampling_cumul(1:i)],yc(1:i+1),'g')
+%     plot([0;phase_duration_sampling_cumul(1:i)],zc(1:i+1),'k')
+%     plot(phase_duration_sampling_cumul(i:i+N-1),xf_c+Pu_c*QP_result_all{i}(1:N),'r')
+%     plot(phase_duration_sampling_cumul(i:i+N-1),yf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),'r')
+%     plot(phase_duration_sampling_cumul(i:i+N-1),zf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N),'r')
+%     legend('x coordinate','y coordinate','z coordinate','preview MPC','Location','northwest')
+%     hold off
+%     
+%     figure(2)
+%     clf
+%     title('MPC CoP trajectory')
+%     xlabel('t [s]') % x-axis label
+%     ylabel('position [m]') % y-axis label
+%     axis([0 16 -0.5 4])
+%     hold on
+%     plot([0;phase_duration_sampling_cumul(1:i)],1*xc+0*xdc-(zc-zzmp_ref(1:i+1))./(zddc+g).*xddc,'b')
+%     plot([0;phase_duration_sampling_cumul(1:i)],1*yc+0*ydc-(zc-zzmp_ref(1:i+1))./(zddc+g).*yddc,'g')
+%     plot([0;phase_duration_sampling_cumul(1:i)],zzmp_ref(1:i+1),'k')
+%     plot(phase_duration_sampling_cumul(i:i+N-1),xf_c+Pu_c*QP_result_all{i}(1:N)-...
+%         (zf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)-zzmp_ref(i+1:i+N))./...
+%         (zf_ddc+Pu_ddc*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)+g).*...
+%         (xf_ddc+Pu_ddc*QP_result_all{i}(1:N)),'r')
+%     plot(phase_duration_sampling_cumul(i:i+N-1),yf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N)-...
+%         (zf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)-zzmp_ref(i+1:i+N))./...
+%         (zf_ddc+Pu_ddc*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)+g).*...
+%         (yf_ddc+Pu_ddc*QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N)),'r')
+%     plot(phase_duration_sampling_cumul(i:i+N-1),zzmp_ref(i+1:i+N),'r')
+%     legend('x coordinate','y coordinate','z coordinate','preview MPC','Location','northwest')
+%     hold off
+    
+    if movie_record
+        F_COM=getframe(figure(1));
+        F_CoP=getframe(figure(2));
+        
+        writeVideo(v_COM,F_COM);
+        writeVideo(v_CoP,F_CoP);
+    end
 end
 toc
+
+if movie_record
+    close(v_COM)
+    close(v_CoP)
+end
 
 %% Results ZMP
 zz=[zzmp_ref(1);zzmp_ref(1:end-1)];

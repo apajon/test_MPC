@@ -22,6 +22,7 @@ Aeq=[];beq=[];
 % Aeq_zc=[zeros(1,size(Pu_c,2)) zeros(1,size(Pu_step,2)) zeros(1,size(Pu_c,2)) zeros(1,size(Pu_step,2)) Pu_c(end,:)];
 % beq_zc=h_com+zzmp_ref_reduce(end)-Px_c(end,:)*[zc(i);zdc(i);zddc(i)];
 
+%%
 % zeta_final=(zeta_up_ref(i+16)+zeta_down_ref(i+16))/2;
 zeta_final=h_com/g;
 w_final=1/sqrt(zeta_final);
