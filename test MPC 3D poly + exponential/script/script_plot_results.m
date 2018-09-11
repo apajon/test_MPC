@@ -343,11 +343,11 @@ switch kinematic_limit
         xdiff_c_step=xc-(xstep_sampling+translation_x);
         ydiff_c_step=yc-(ystep_sampling-(sign(ystep_sampling))*translation_y);
 
-%         for i=1:size(plan_hexagon,2)
-%             for j=1:size(plan_hexagon{i},1)
-%                 z=[z -(plan_hexagon{i}(j,1)*xdiff_c_step+plan_hexagon{i}(j,2)*ydiff_c_step+plan_hexagon{i}(j,4))/plan_hexagon{i}(j,3)];
-%             end
-%         end
+        for i=1:size(plan_hexagon,2)
+            for j=1:size(plan_hexagon{i},1)
+                z=[z -(plan_hexagon{i}(j,1)*xdiff_c_step+plan_hexagon{i}(j,2)*ydiff_c_step+plan_hexagon{i}(j,4))/plan_hexagon{i}(j,3)];
+            end
+        end
 
         z=z+zstep_sampling;
 

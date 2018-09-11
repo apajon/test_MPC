@@ -2,7 +2,8 @@
 %% Mechanics
 g=9.81; %m.s-1
 % h_com=0.8;
-h_com=0.780678; %m
+% h_com=0.780678; %m
+h_com=0.748964; %m
 
 %% Phase duration
 phase_duration_r=0.7;
@@ -39,20 +40,24 @@ T_stop=phase_duration_stop/N_stop;
 
 %% Initial Robot State
 % xcom_0=[0;0;0];
-xcom_0=[-0.00365306;0;0];
+% xcom_0=[-0.00365306;0;0];
+xcom_0=[3.5959*10^-5;0;0];
 
 % ycom_0=[0;0;0];
-ycom_0=[+0.00047291;0;0];
+% ycom_0=[+0.00047291;0;0];
+ycom_0=[-2.1886*10^-6;0;0];
 
 zcom_0=[h_com;0;0];
 
-xstep_r_0=0;
-% ystep_r_0=-0.13;
+xstep_r_0=-0.00365306;
 ystep_r_0=-0.0815817;
+% xstep_r_0=-0.0113;
+% ystep_r_0=-0.073972;
 
-xstep_l_0=0;
-% ystep_l_0=+0.13;
+xstep_l_0=-0.00365306;
 ystep_l_0=0.0817;
+% xstep_l_0=-0.0113;
+% ystep_l_0=0.073972;
 
 %% Foot limits
 % %hrp2
@@ -73,17 +78,18 @@ sole_margin=0.02;
 xankmax=0.8;%stepping forward max
 xankmin=-0.4;%stepping forward min (if negative, it means stepping backward max)
 yankmin=2*inttoankle+0.0552;%0.15;%width min between ankles
+% yankmin=2*inttoankle+0.0399;%0.15;%width min between ankles
 yankmax=2*inttoankle+0.4;%width max between ankles
 % yankmax=2*inttoankle+0.0552;%width max between ankles
 
 %% COM height limits to the floor
 switch(walking_type)
     case 1
-        h_com_max=+0.05;
+        h_com_max=+0.0317;
         h_com_min=-0.25;
     case 2
         h_com_max=+0.05;
-        h_com_min=-0.25;
+        h_com_min=-0.35;
     case 3
         h_com_max=+0.05;
         h_com_min=-0.1;

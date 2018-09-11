@@ -23,9 +23,9 @@ footwidth=exttoankle+inttoankle;
 w=footlength; %width
 h=footwidth; %height
 x=-backtoankle;
-XY=zeros(length(pstep),10);
+XY=zeros(size(pstep,1),10);
 
-for i=1:length(pstep)
+for i=1:size(pstep,1)
     switch (firstSS)
         case 0
             y=-inttoankle*mod(i+1,2)-exttoankle*mod(i,2); %corner position

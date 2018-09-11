@@ -4,7 +4,7 @@ clc
 
 addpath script/ function/
 
-walking_type=1;
+walking_type=2;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
@@ -23,7 +23,7 @@ run('script/script_phase_duration.m')
 run('script/script_ref.m')
 
 %% ZMP COM Linear form
-COM_form='zmp vel'
+COM_form='com jerk'
 %'com jerk' : COM with piece-wise jerk
 %'zmp vel' : ZMP with piece-wise velocity
 switch(COM_form)
@@ -112,7 +112,7 @@ end
 tic
 for i=1:phase_duration_iteration_cumul(end)
     i
-    if i>=55
+    if i>=29
         i
     end
     
@@ -591,7 +591,8 @@ run('script/script_plot_results.m')
     
 %% write txt
 if false
-    e_=0.099;
+%     e_=0.099;
+    e_=0;
     e=0;
     trajectories=[dt_type_phase_ ...
             xz_discret yz_discret zz_discret ...

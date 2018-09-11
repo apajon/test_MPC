@@ -1,13 +1,12 @@
 %% compute linear COM and ZMP
 %% COM
-
+omega_temp=sqrt(g/h_com);
+zeta_temp=1/omega_temp^2;
 switch(COM_form)
     case 'com jerk'
         [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_comJerk(phase_duration_sampling(1+(i-1):N+(i-1),:),N);
 
     case 'zmp vel'
-        omega_temp=1;
-        zeta_temp=1/omega_temp^2;
         [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_zmpVel(ones(N,1)*zeta_temp,phase_duration_sampling(1+(i-1):N+(i-1),:),N);
 end
 
