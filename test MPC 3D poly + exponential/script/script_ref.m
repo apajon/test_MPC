@@ -2,16 +2,16 @@
 xvcom_ref=zeros(phase_duration_iteration_cumul(end),1);
 yvcom_ref=zeros(phase_duration_iteration_cumul(end),1);
 
-vcom_change=round(size(xvcom_ref,1)*1/2)+4;
-
+% vcom_change=round(size(xvcom_ref,1)*1/2)+4;
+vcom_change=round(size(xvcom_ref,1)*1/3)+16;
 
 switch(walking_type)
     case 1
         vcom_1=0.2; %m.s^-1
         vcom_2=0.6; %m.s^-1
     case 2
-        vcom_1=0.6; %m.s^-1
-        vcom_2=0.6; %m.s^-1
+        vcom_1=0.4; %m.s^-1
+        vcom_2=0.4; %m.s^-1
     case 3
         vcom_1=0.6; %m.s^-1
         vcom_2=1.2; %m.s^-1
@@ -24,6 +24,10 @@ switch(walking_type)
 end
 xvcom_ref(N_start+1:vcom_change)=xvcom_ref(N_start+1:vcom_change)+vcom_1; %m.s^-1
 xvcom_ref(vcom_change+1:end-N_stop)=xvcom_ref(vcom_change+1:end-N_stop)+vcom_2; %m.s^-1
+% xvcom_ref(N_start+1:vcom_change)=xvcom_ref(N_start+1:vcom_change)+vcom_1; %m.s^-1
+% xvcom_ref(vcom_change+1:vcom_change+8)=xvcom_ref(vcom_change+1:vcom_change+8)+(vcom_1+vcom_2)/2; %m.s^-1
+% xvcom_ref(vcom_change+9:end-N_stop)=xvcom_ref(vcom_change+9:end-N_stop)+vcom_2; %m.s^-1
+
 
 xvcom_ref=[xvcom_ref;zeros(size(phase_type_sampling,1)-size(xvcom_ref,1),1)];
 yvcom_ref=[yvcom_ref;zeros(size(phase_type_sampling,1)-size(yvcom_ref,1),1)];

@@ -2,15 +2,16 @@
 %% Mechanics
 g=9.81; %m.s-1
 % h_com=0.8;
-% h_com=0.780678; %m
-h_com=0.748964; %m
+h_com=0.780678; %m
+% h_com=0.748964+0.095; %m
+% h_com=0.78; %m
 
 %% Phase duration
 phase_duration_r=0.7;
 phase_duration_l=0.7;
 phase_duration_b=0.1;
-phase_duration_start=2.4;
-phase_duration_stop=2.4;
+phase_duration_start=1.4;
+phase_duration_stop=1.4;
 
 preview_windows_duration=phase_duration_r+phase_duration_l+phase_duration_b*2;
 
@@ -24,8 +25,8 @@ preview_windows_duration=phase_duration_r+phase_duration_l+phase_duration_b*2;
 N_r=7;
 N_l=7;
 N_b=1;
-N_start=24;
-N_stop=24;
+N_start=14;
+N_stop=14;
 % N=N_r+N_l+N_b*2;
 
 
@@ -49,15 +50,28 @@ ycom_0=[-2.1886*10^-6;0;0];
 
 zcom_0=[h_com;0;0];
 
-xstep_r_0=-0.00365306;
-ystep_r_0=-0.0815817;
-% xstep_r_0=-0.0113;
-% ystep_r_0=-0.073972;
+% xstep_r_0=-0.00365306;
+% ystep_r_0=-0.0815817;
+xstep_r_0=-0.015;
+ystep_r_0=-0.06845;
 
-xstep_l_0=-0.00365306;
-ystep_l_0=0.0817;
-% xstep_l_0=-0.0113;
-% ystep_l_0=0.073972;
+% xstep_l_0=-0.00365306;
+% ystep_l_0=0.0817;
+xstep_l_0=-0.015;
+ystep_l_0=0.06845;
+
+
+% xcom_0=[0;0;0];
+% ycom_0=[0;0;0];
+% 
+% zcom_0=[h_com;0;0];
+% 
+% xstep_r_0=0;
+% ystep_r_0=-0.07845;
+% 
+% xstep_l_0=0;
+% ystep_l_0=0.07845;
+
 
 %% Foot limits
 % %hrp2
@@ -79,6 +93,7 @@ xankmax=0.8;%stepping forward max
 xankmin=-0.4;%stepping forward min (if negative, it means stepping backward max)
 yankmin=2*inttoankle+0.0552;%0.15;%width min between ankles
 % yankmin=2*inttoankle+0.0399;%0.15;%width min between ankles
+% yankmin=0.1769
 yankmax=2*inttoankle+0.4;%width max between ankles
 % yankmax=2*inttoankle+0.0552;%width max between ankles
 
@@ -87,6 +102,8 @@ switch(walking_type)
     case 1
         h_com_max=+0.0317;
         h_com_min=-0.25;
+%         h_com_max=+0.0317;
+%         h_com_min=-0.25;
     case 2
         h_com_max=+0.05;
         h_com_min=-0.35;
@@ -94,7 +111,7 @@ switch(walking_type)
         h_com_max=+0.05;
         h_com_min=-0.1;
     case 4
-        h_com_max=+0.05;
+        h_com_max=+0.0317;
         h_com_min=-0.25;
     case 5
         h_com_max=+0.05;

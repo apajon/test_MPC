@@ -78,7 +78,7 @@
         A_step_stretch=[zeros(size(Pu_step,2),N) A_step_stretch];
         A_step_stretch=[A_step_stretch;-A_step_stretch];
         
-        A_step_stretch=blkdiag(A_step_stretch,A_step_stretch);
+        A_step_stretch=blkdiag(A_step_stretch*0,A_step_stretch);
         
         %%%
         phase_type_nodouble_reduce=phase_type_reduce(any(phase_type_reduce~='b'&phase_type_reduce~="start"&phase_type_reduce~="stop",2));
@@ -104,7 +104,7 @@
         yb_step_stretch([1 end/2+1])=yb_step_stretch([1 end/2+1])+[ystep(end);-ystep(end)];
     end
     
-    b_step_stretch=[xb_step_stretch;yb_step_stretch];
+    b_step_stretch=[xb_step_stretch*0;yb_step_stretch];
     
     % Constraint concatenation
     if i>=length(xvcom_ref)-39

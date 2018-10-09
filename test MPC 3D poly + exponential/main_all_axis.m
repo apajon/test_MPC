@@ -4,7 +4,7 @@ clc
 
 addpath script/ function/
 
-walking_type=2;
+walking_type=4;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
@@ -44,7 +44,7 @@ switch kinematic_limit
         number_level=2;
         run('script/script_polyhedron_hexagon.m')
     case 'hexagonTranslation'
-        number_level=2;
+        number_level=3;
         run('script/script_polyhedron_hexagon_translation.m')
     otherwise
         error('choose a type of kinematic_limit')
@@ -62,7 +62,7 @@ run('script/script_init_storage_qp_result.m')
 % w4=10^-1; %com height
 
 %as Camille
-w1=10^-7; %jerk
+w1=10^-7; %jerk -7
 w2=10^0; %com vel ref
 switch(walking_type)
     case {1,2,3}
@@ -82,6 +82,13 @@ w4=10^-2; %com height
 % w2=10^0; %com vel ref
 % w3=10^0; %zmp wth zeta mean close to step
 % w4=10^0; %com height
+
+% %as Stephane
+% w1=1; %jerk -7
+% w2=10; %com vel ref
+% w3=1000; %zmp wth zeta mean close to step
+% w4=10^-2*0; %com height
+
 
 % switch(COM_form)
 %     case 'com jerk'
@@ -595,8 +602,8 @@ if false
     e_=0;
     e=0;
     trajectories=[dt_type_phase_ ...
-            xz_discret yz_discret zz_discret ...
-            xc_discret yc_discret zc_discret ...
+            xz_discret yz_discret zz_discret-0.0317 ...
+            xc_discret yc_discret zc_discret-0.0317 ...
             xdc_discret ydc_discret zdc_discret ...
             xddc_discret yddc_discret zddc_discret ...
             pankle_l(:,1) pankle_l(:,2) pankle_l(:,3)+e_-e ...
@@ -607,10 +614,14 @@ if false
             aankle_r(:,1) aankle_r(:,2) aankle_r(:,3) ...
             pankle_l(:,1)*0 pankle_l(:,2)*0 pankle_l(:,3)*0 ... %rtheta_dt_r rphi_dt_r
             pankle_r(:,1)*0 pankle_r(:,2)*0 pankle_r(:,3)*0]; %rtheta_dt_r rphi_dt_r
+        
 
     %% %save data in txt
     % zmpcom=fopen('zmp_com_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
-    zmpcom=fopen('zmp_com_test.txt','w');
+    filename=['zmp_com_type_' num2str(walking_type) '_vcom1_' num2str(vcom_1) '_vcom2_' num2str(vcom_2)];
+    filename=strrep(filename,'.','_');
+    filename=[filename '.txt'];
+    zmpcom=fopen(filename,'w');
 
 
     for i=1:size(trajectories,1)
@@ -623,10 +634,13 @@ if false
 
     pstep_=[pstep(:,1) pstep(:,2) psi_];
     % pstepf=fopen('pstep_9_100_step4_oscil16cm_tss1000_tds500_tpi2500.txt','w');
-    pstepf=fopen('pstep_test.txt','w');
+    filename=['pstep_type_' num2str(walking_type) '_vcom1_' num2str(vcom_1) '_vcom2_' num2str(vcom_2)];
+    filename=strrep(filename,'.','_');
+    filename=[filename '.txt'];
+    pstepf=fopen(filename,'w');
 
 
-    for i=1:size(pstep_,1)
+    for i=3:size(pstep_,1)
         fprintf(pstepf,'%f %f %f\n',pstep_(i,:));
     end
     fclose(pstepf);
