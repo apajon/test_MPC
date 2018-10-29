@@ -2,16 +2,30 @@
 %% Mechanics
 g=9.81; %m.s-1
 % h_com=0.8;
-h_com=0.780678; %m
 % h_com=0.748964+0.095; %m
-% h_com=0.78; %m
+%h_com=0.78; %m
+
+h_com=0.780678;
+switch controller
+    case 'vrep'
+        %h_com=0.748964;
+        h_com=0.780273289863387;
+    case 'rviz'
+        h_com=0.780678; %m
+    otherwise
+        msg='Bad choice of controller \n';
+        msg1='vrep \n';
+        msg2='rviz \n';
+        errormsg=[msg msg1 msg2];
+        error(errormsg,[])
+end
 
 %% Phase duration
-phase_duration_r=0.7;
-phase_duration_l=0.7;
-phase_duration_b=0.1;
+phase_duration_r=1.7;
+phase_duration_l=1.7;
+phase_duration_b=0.4;
 phase_duration_start=1.4;
-phase_duration_stop=1.4;
+phase_duration_stop=2.4;
 
 preview_windows_duration=phase_duration_r+phase_duration_l+phase_duration_b*2;
 
@@ -22,11 +36,11 @@ preview_windows_duration=phase_duration_r+phase_duration_l+phase_duration_b*2;
 % T=5*10^-2;
 % N=30;
 
-N_r=7;
-N_l=7;
+N_r=17;
+N_l=17;
 N_b=1;
 N_start=14;
-N_stop=14;
+N_stop=24;
 % N=N_r+N_l+N_b*2;
 
 
@@ -40,25 +54,46 @@ T_stop=phase_duration_stop/N_stop;
 
 
 %% Initial Robot State
-% xcom_0=[0;0;0];
-% xcom_0=[-0.00365306;0;0];
-xcom_0=[3.5959*10^-5;0;0];
+switch controller
+    case 'vrep'
+%         xcom_0=[3.5959*10^-5;0;0];
+%         ycom_0=[-2.1886*10^-6;0;0];
+%         zcom_0=[h_com;0;0];
+% 
+%         xstep_r_0=-0.015;
+%         ystep_r_0=-0.06845;
+% 
+%         xstep_l_0=-0.015;
+%         ystep_l_0=0.06845;
+        
+        xcom_0=[-0.0149883888510708;0;0];
+        ycom_0=[0.000850173415884411;0;0];
+        zcom_0=[h_com;0;0];
 
-% ycom_0=[0;0;0];
-% ycom_0=[+0.00047291;0;0];
-ycom_0=[-2.1886*10^-6;0;0];
+        xstep_r_0=-0.0152074908954922;
+        ystep_r_0=-0.0790897453289095;
 
-zcom_0=[h_com;0;0];
+        xstep_l_0=-0.0163389718197275;
+        ystep_l_0=0.0816625960261456;
+    case 'rviz'
+        xcom_0=[-0.00365306;0;0];
+        ycom_0=[+0.00047291;0;0];
+        zcom_0=[h_com;0;0];
+        
+        xstep_r_0=0;
+        ystep_r_0=-0.0815817;
+        
+        xstep_l_0=0;
+        ystep_l_0=0.0815817;
+    otherwise
+        msg='Bad choice of controller \n';
+        msg1='vrep \n';
+        msg2='rviz \n';
+        errormsg=[msg msg1 msg2];
+        error(errormsg,[])
+end
 
-% xstep_r_0=-0.00365306;
-% ystep_r_0=-0.0815817;
-xstep_r_0=-0.015;
-ystep_r_0=-0.06845;
 
-% xstep_l_0=-0.00365306;
-% ystep_l_0=0.0817;
-xstep_l_0=-0.015;
-ystep_l_0=0.06845;
 
 
 % xcom_0=[0;0;0];

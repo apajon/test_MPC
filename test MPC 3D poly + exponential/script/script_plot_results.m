@@ -397,5 +397,7 @@ plot([0;phase_duration_sampling_cumul(1:size(xvcom_ref,1)-1)],xvcom_ref)
 temp_vcom=smooth(xvcom_ref,16);
 plot([0;phase_duration_sampling_cumul(1:size(temp_vcom,1)-1)],temp_vcom)
 
+plot([0;phase_duration_sampling_cumul(1:size(yz,1)-1)],yz*10+0.3)
+
 hold off
 legend('COM vel','COM vel ref','Location','southeast')

@@ -4,8 +4,8 @@ clear all
 g=9.81; %m.s-1
 h_com=0.8; %m
 Q=1; R=Q*10^-6; %R/Q=10^-6
-T=5*10^-3; %s
-N=300;
+% T=5*10^-3; %s
+% N=300;
 
 T=5*10^-2;
 N=30;
@@ -92,8 +92,9 @@ dddx2_H=eye(N);
 dddx2_f=zeros(1,N);
 
 
-tic
+% tic
 for i=1:round(max(phase_duration_cumul)/T)
+    tic
     % ZMP error
     z_H=P_u;
     z_f=P_x*[x(i);dx(i);ddx(i)]-z_ref(1+(i-1):N+(i-1));
@@ -111,7 +112,7 @@ for i=1:round(max(phase_duration_cumul)/T)
     % Options
 %     options=optimoptions('quadprog','Display','iter');
     options=optimoptions('quadprog','Display','off');
-
+    
     % Optimization QP
     dddx=quadprog(H,f,A,b,Aeq,beq,lb,ub,x0,options);
     
@@ -119,8 +120,9 @@ for i=1:round(max(phase_duration_cumul)/T)
     x(i+1)=[1 T T^2/2]*[x(i);dx(i);ddx(i)]+T^3/6*dddx(1);
     dx(i+1)=[0 1 T]*[x(i);dx(i);ddx(i)]+T^2/2*dddx(1);
     ddx(i+1)=[0 0 1]*[x(i);dx(i);ddx(i)]+T*dddx(1);
+    toc
 end
-toc
+% toc
 
 % Results ZMP
 z=1*x+0*dx-h_com/g*ddx;

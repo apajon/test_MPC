@@ -59,6 +59,22 @@ Pu_z_mean=(Pu_z_up+Pu_z_down)/2;
 
 H_z_mean=Pu_z_mean.'*Pu_z_mean;
 
+%% ZMP mean vel
+Px_dz_up=Px_dc-eye(size(Px_dc)).*repmat(zeta_up,1,3);
+Pu_dz_up=Pu_dc-eye(size(Pu_dc)).*repmat(zeta_up,1,N);
+Px_dz_down=Px_dc-eye(size(Px_dc)).*repmat(zeta_down,1,3);
+Pu_dz_down=Pu_dc-eye(size(Pu_dc)).*repmat(zeta_down,1,N);
+
+xf_dz_up=Px_dz_up*[xc(i);xdc(i);xddc(i)];
+yf_dz_up=Px_dz_up*[yc(i);ydc(i);yddc(i)];
+xf_dz_down=Px_dz_down*[xc(i);xdc(i);xddc(i)];
+yf_dz_down=Px_dz_down*[yc(i);ydc(i);yddc(i)];
+
+xf_dz_mean=(xf_dz_up+xf_dz_down)/2;
+yf_dz_mean=(yf_dz_up+yf_dz_down)/2;
+
+Pu_dz_mean=(Pu_dz_up+Pu_dz_down)/2;
+
 
 %% Capture point up
 Px_Capture_up=Px_c+Px_dc.*repmat(sqrt(zeta_up_ref(1+(i-1):N+(i-1),:)),1,size(Px_dc,2));
