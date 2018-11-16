@@ -21,9 +21,9 @@ switch controller
 end
 
 %% Phase duration
-phase_duration_r=1.7;
-phase_duration_l=1.7;
-phase_duration_b=0.4;
+phase_duration_r=.7;
+phase_duration_l=.7;
+phase_duration_b=.1;
 phase_duration_start=1.4;
 phase_duration_stop=2.4;
 
@@ -36,8 +36,8 @@ preview_windows_duration=phase_duration_r+phase_duration_l+phase_duration_b*2;
 % T=5*10^-2;
 % N=30;
 
-N_r=17;
-N_l=17;
+N_r=7;
+N_l=7;
 N_b=1;
 N_start=14;
 N_stop=24;
@@ -140,13 +140,13 @@ switch(walking_type)
 %         h_com_max=+0.0317;
 %         h_com_min=-0.25;
     case 2
-        h_com_max=+0.05;
-        h_com_min=-0.35;
+        h_com_max=+0.0317;
+        h_com_min=-0.25;
     case 3
         h_com_max=+0.05;
         h_com_min=-0.1;
     case 4
-        h_com_max=+0.0317;
+        h_com_max=+0.005;
         h_com_min=-0.25;
     case 5
         h_com_max=+0.05;

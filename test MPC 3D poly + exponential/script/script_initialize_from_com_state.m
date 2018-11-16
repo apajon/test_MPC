@@ -4,22 +4,22 @@ omega_temp=sqrt(g/h_com);
 zeta_temp=1/omega_temp^2;
 switch(COM_form)
     case 'com jerk'
-        [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_comJerk(phase_duration_sampling(1+(i-1):N+(i-1),:),N);
+        [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_comJerk(phase_duration_sampling(preview_windows,:),N);
 
     case 'zmp vel'
-        [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_zmpVel(ones(N,1)*zeta_temp,phase_duration_sampling(1+(i-1):N+(i-1),:),N);
+        [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_zmpVel(ones(N,1)*zeta_temp,phase_duration_sampling(preview_windows,:),N);
 end
 
 H_c=Pu_c.'*Pu_c;
 H_dc=Pu_dc.'*Pu_dc;
 
 %% ZMP up
-zeta_up=zeta_up_ref(1+(i-1):N+(i-1),:);
+zeta_up=zeta_up_ref(preview_windows,:);
 Px_z_up=Px_c-Px_ddc.*repmat(zeta_up,1,3);
 Pu_z_up=Pu_c-Pu_ddc.*repmat(zeta_up,1,N);
 
 %% ZMP down
-zeta_down=zeta_down_ref(1+(i-1):N+(i-1),:);
+zeta_down=zeta_down_ref(preview_windows,:);
 Px_z_down=Px_c-Px_ddc.*repmat(zeta_down,1,3);
 Pu_z_down=Pu_c-Pu_ddc.*repmat(zeta_down,1,N);
 
@@ -39,8 +39,8 @@ yf_ddc=Px_ddc*[yc(i);ydc(i);yddc(i)];
 zf_ddc=Px_ddc*[zc(i);zdc(i);zddc(i)];
 
 %% COM velocity ref
-xf_dc_ref=xvcom_ref(1+(i-1):N+(i-1));
-yf_dc_ref=yvcom_ref(1+(i-1):N+(i-1));
+xf_dc_ref=xvcom_ref(preview_windows);
+yf_dc_ref=yvcom_ref(preview_windows);
 
 %% ZMP position up
 xf_z_up=Px_z_up*[xc(i);xdc(i);xddc(i)];
@@ -77,19 +77,19 @@ Pu_dz_mean=(Pu_dz_up+Pu_dz_down)/2;
 
 
 %% Capture point up
-Px_Capture_up=Px_c+Px_dc.*repmat(sqrt(zeta_up_ref(1+(i-1):N+(i-1),:)),1,size(Px_dc,2));
+Px_Capture_up=Px_c+Px_dc.*repmat(sqrt(zeta_up_ref(preview_windows,:)),1,size(Px_dc,2));
 
 xf_Capture_up=Px_Capture_up*[xc(i);xdc(i);xddc(i)];
 yf_Capture_up=Px_Capture_up*[yc(i);ydc(i);yddc(i)];
 zf_Capture_up=Px_Capture_up*[zc(i);zdc(i);zddc(i)];
 
-Pu_Capture_up=Pu_c+Pu_dc.*repmat(sqrt(zeta_up_ref(1+(i-1):N+(i-1),:)),1,size(Pu_dc,2));
+Pu_Capture_up=Pu_c+Pu_dc.*repmat(sqrt(zeta_up_ref(preview_windows,:)),1,size(Pu_dc,2));
 
 %% Capture point down
-Px_Capture_down=Px_c+Px_dc.*repmat(sqrt(zeta_down_ref(1+(i-1):N+(i-1),:)),1,size(Px_dc,2));
+Px_Capture_down=Px_c+Px_dc.*repmat(sqrt(zeta_down_ref(preview_windows,:)),1,size(Px_dc,2));
 
 xf_Capture_down=Px_Capture_down*[xc(i);xdc(i);xddc(i)];
 yf_Capture_down=Px_Capture_down*[yc(i);ydc(i);yddc(i)];
 zf_Capture_down=Px_Capture_down*[zc(i);zdc(i);zddc(i)];
 
-Pu_Capture_down=Pu_c+Pu_dc.*repmat(sqrt(zeta_down_ref(1+(i-1):N+(i-1),:)),1,size(Pu_dc,2));
+Pu_Capture_down=Pu_c+Pu_dc.*repmat(sqrt(zeta_down_ref(preview_windows,:)),1,size(Pu_dc,2));

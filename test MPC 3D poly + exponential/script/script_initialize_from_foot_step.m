@@ -1,9 +1,9 @@
 %% Initialize from last fixed foot step
 %% Foot step ref
-    Px_step_reduce=Px_step_ref(1+(i-1):N+(i-1),:);
+    Px_step_reduce=Px_step_ref(preview_windows,:);
     Px_step_reduce=Px_step_reduce(:,any(Px_step_reduce));
     
-    phase_type_sampling_reduce=phase_type_sampling(1+(i-1):N+(i-1),:);
+    phase_type_sampling_reduce=phase_type_sampling(preview_windows,:);
 %     phase_type_sampling_reduce(any(phase_type_sampling_reduce=="start",2))='b';
 %     phase_type_sampling_reduce(any(phase_type_sampling_reduce=="stop",2))='b';
     phase_type_reduce=phase_type_sampling_reduce(([0;phase_type_sampling_reduce(1:end-1)]==phase_type_sampling_reduce)==0);
@@ -39,4 +39,4 @@
     end
     
 %% Foot step height ref
-    zstep_ref_reduce=zzmp_ref(1+(i-1):N+(i-1),:);
+    zstep_ref_reduce=zzmp_ref(preview_windows,:);

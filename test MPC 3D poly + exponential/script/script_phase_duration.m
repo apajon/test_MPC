@@ -41,18 +41,31 @@ switch(walking_type)
 %        11 4.3042    0.08165;
 %        12 4.7332   -0.08165];
 
-    step_number_pankle_fixed=[1 0.2186    0.0948
-    2 0.3742   -0.0684
-    3 0.5340    0.0948
-    4 0.6640   -0.0684
-    5 0.8498    0.0948
-    6 1.3324   -0.0684
-    7 1.7962    0.0948
-    8 2.2638   -0.0684
-    9 2.7306    0.0948
-    10 3.1973   -0.0684
-    11 3.7004    0.0948
-    12 4.1259   -0.0684];
+%     step_number_pankle_fixed=[1 0.2186    0.0948
+%     2 0.3742   -0.0684
+%     3 0.5340    0.0948
+%     4 0.6640   -0.0684
+%     5 0.8498    0.0948
+%     6 1.3324   -0.0684
+%     7 1.7962    0.0948
+%     8 2.2638   -0.0684
+%     9 2.7306    0.0948
+%     10 3.1973   -0.0684
+%     11 3.7004    0.0948
+%     12 4.1259   -0.0684];
+    step_number_pankle_fixed=[1 0.335058585475008   NaN
+       2 0.335058585475008+0.24  NaN
+       3 0.335058585475008+0.24*2  NaN
+       4 0.335058585475008+0.24*3  NaN
+       5 0.335058585475008+0.24*4  NaN
+       6 1.809673827281263+0.24*5  NaN
+       7 2.108828040870965  NaN
+       8 2.405016021874720  NaN
+       9 2.702365606329494  NaN
+       10 2.999236624296849  NaN
+       11 3.325086673919420  NaN
+       12 3.554027657071293  NaN];
+   step_number_pankle_fixed(:,2)=0.335058585475008+0.24*[0:11]';
     case 5
     step_number_pankle_fixed=[1 0.545705354503507 0.08165;
         2 0.923523675671500 -0.08165;
@@ -139,7 +152,7 @@ phase_duration_iteration=zeros(length(phase_type),1);
 phase_duration_iteration(any(phase_type=='r',2))=N_r;
 phase_duration_iteration(any(phase_type=='l',2))=N_l;
 phase_duration_iteration(any(phase_type=='b',2))=N_b;
-phase_duration_iteration(any(phase_type=='start',2))=N_start;
+phase_duration_iteration(any(phase_type=='start',2))=N_start-1;
 phase_duration_iteration(any(phase_type=='stop',2))=N_stop;
 
 
@@ -152,7 +165,7 @@ phase_type_sampling=[];
 for i=1:length(phase_duration)
     switch(phase_type(i))
         case 'start'
-            phase_type_sampling_temp=repmat(phase_type(i),N_start,1);
+            phase_type_sampling_temp=repmat(phase_type(i),N_start-1,1);
         case 'stop'
             phase_type_sampling_temp=repmat(phase_type(i),N_stop,1);
         case 'r'
@@ -194,14 +207,19 @@ phase_duration_sampling(any(phase_type_sampling=='r',2))=T_l;
 phase_duration_sampling(any(phase_type_sampling=='l',2))=T_l;
 phase_duration_sampling(any(phase_type_sampling=='b',2))=T_b;
 
+phase_duration_sampling=[T_start;phase_duration_sampling(1:end-1,:)];
+
 if sum(any(phase_duration_sampling==0,2))~=0
     error(['Undefined phase type in phase_type_sampling'])
 end
 
 phase_duration_sampling_cumul=cumsum(phase_duration_sampling);
 
+% phase_type_sampling=[phase_type_sampling(2:end);phase_type_sampling(end)];
+
 %% phase decoupling
 phase_sampling_length=[1;cumsum(phase_duration_iteration(1:end-1))+1];
+% phase_sampling_length=[1;cumsum(phase_duration_iteration(1:end-1))];
 
 phase_type_decouple=zeros(length(phase_type_sampling),length(phase_type));
 for i=1:length(phase_sampling_length)-1

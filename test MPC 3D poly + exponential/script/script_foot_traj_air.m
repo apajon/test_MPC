@@ -3,7 +3,6 @@ pstep=[xstep ystep];
 psi=zeros(size(pstep,1)*3,1);
 firstSS=(phase_type(2)=='r');
 %%
-hstep_move=0.05;
 pstep_3d=[pstep zstep];
 pstep_3d_phase_r=[];
 pstep_3d_phase_l=[];

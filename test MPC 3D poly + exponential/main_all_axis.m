@@ -4,7 +4,7 @@ clc
 
 addpath script/ function/
 
-walking_type=5;
+walking_type=1;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
@@ -30,11 +30,13 @@ run('script/script_ref.m')
 COM_form='com jerk'
 %'com jerk' : COM with piece-wise jerk
 %'zmp vel' : ZMP with piece-wise velocity
-switch(COM_form)
-    case 'com jerk'
-%        run('script/script_zmp_com_linear_form_comJerk.m')
-    case 'zmp vel'
-end
+%'poly expo' : 2nd poly of exponential
+
+% switch(COM_form)
+%     case 'com jerk'
+% %        run('script/script_zmp_com_linear_form_comJerk.m')
+%     case 'zmp vel'
+% end
 
 %% Polyhedron limits
 kinematic_limit='hexagonTranslation';
@@ -72,9 +74,9 @@ switch(walking_type)
     case {1,2,3}
         w2=10^0; %com vel ref
     case {4,5}
-        w2=0*10^0; %com vel ref
+        w2=10^0; %com vel ref
 end
-w3=10^-1; %zmp wth zeta mean close to step
+w3=10^2; %zmp wth zeta mean close to step
 w4=10^-2; %com height
 
 w5=10^-1*0; %zmp acceleration aka COM acceleration
@@ -136,6 +138,9 @@ for i=1:phase_duration_iteration_cumul(end)
         t=t+phase_duration_sampling(i+N);
         N=N+1;
     end
+    
+    preview_windows=1+(i-1):N+(i-1);
+%     preview_windows=1+(i):N+(i);
     %% Initialization from last robot COM state
     run('script/script_initialize_from_com_state.m')
     
@@ -149,6 +154,10 @@ for i=1:phase_duration_iteration_cumul(end)
             run('script/script_update_cost_comJerk.m')
         case 'zmp vel'
             run('script/script_update_cost_zmpVel.m')
+        case 'poly expo'
+            error('script_update_cost_polyExpo.m not define')
+        otherwise
+            error('Bad COM_form')
     end
     
     
@@ -238,8 +247,10 @@ end
 run('script/script_zmp.m')
 
 %% foot traj in the air
-% run('script/script_foot_traj_air.m')
-run('script/script_foot_traj_air_stairs.m')
+% hstep_move=0.05;
+hstep_move=0.2;
+run('script/script_foot_traj_air.m')
+% run('script/script_foot_traj_air_stairs.m')
 
 %% discretization trajectories
 run('script/script_traj_discretization.m')

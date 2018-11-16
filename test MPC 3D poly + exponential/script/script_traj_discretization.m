@@ -67,7 +67,8 @@ switch(COM_form)
     end
 
 
-zzmp_ref_discret=zeros(round(max(phase_duration_cumul)*frequency),1);
+% zzmp_ref_discret=zeros(round(max(phase_duration_cumul)*frequency),1);
+zzmp_ref_discret=zeros(size(zc_discret,1)-1,1);
 switch(walking_type)
     case 1
     case 2

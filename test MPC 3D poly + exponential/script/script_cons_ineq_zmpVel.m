@@ -19,28 +19,28 @@
 %% Constraint ZMP in convex hull
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
     no_double_support=(sum(Px_step_ref==1,2)==1);
-    no_double_support=no_double_support(1+(i-1):N+(i-1),:);
+    no_double_support=no_double_support(preview_windows,:);
     
 %     right_support=any(phase_type_sampling_reduce=='r',2);
 %     left_support=any(phase_type_sampling_reduce=='l',2);
     if phase_type(2)=='r'
         if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='r'
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
         elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='l'
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
         else
             right_support=false(size(no_double_support));
             left_support=false(size(no_double_support));
         end
     elseif phase_type(2)=='l'
         if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='r'
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
         elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='l'
-            left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-            right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+            left_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
+            right_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
         else
             right_support=false(size(no_double_support));
             left_support=false(size(no_double_support));
@@ -57,7 +57,7 @@
     
     double_support=[];
     if any(Px_step_ref(1+(i-1),1:2:end)==0.5,2)||any(Px_step_ref(N+(i-1),1:2:end)==0.5,2)
-        double_support=any(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==0.5,2);
+        double_support=any(Px_step_ref(preview_windows,1:2:end)==0.5,2);
     end
     
     [A_zmp,b_zmp]=function_constraint_convexhull(...
@@ -119,11 +119,11 @@
     A=[A zeros(size(A,1),size(H_c,2))];    
     %% Constraint vertical com motion
     %zeta_down (zddc - g) < (zc-zp) < zeta_up (zddc + g)
-    A_verti_motion_up=Pu_c-diag(zeta_up_ref(1+(i-1):N+(i-1),:))*Pu_ddc;
-    b_verti_motion_up=zeta_up_ref(1+(i-1):N+(i-1),:).*g+zzmp_ref_reduce-(zf_c-zeta_up_ref(1+(i-1):N+(i-1),:).*Px_ddc*[zc(i);zdc(i);zddc(i)]);
+    A_verti_motion_up=Pu_c-diag(zeta_up_ref(preview_windows,:))*Pu_ddc;
+    b_verti_motion_up=zeta_up_ref(preview_windows,:).*g+zzmp_ref_reduce-(zf_c-zeta_up_ref(preview_windows,:).*Px_ddc*[zc(i);zdc(i);zddc(i)]);
 
-    A_verti_motion_down=Pu_c-diag(zeta_down_ref(1+(i-1):N+(i-1),:))*Pu_ddc;
-    b_verti_motion_down=zeta_down_ref(1+(i-1):N+(i-1),:).*g+zzmp_ref_reduce-(zf_c-zeta_down_ref(1+(i-1):N+(i-1),:).*Px_ddc*[zc(i);zdc(i);zddc(i)]);
+    A_verti_motion_down=Pu_c-diag(zeta_down_ref(preview_windows,:))*Pu_ddc;
+    b_verti_motion_down=zeta_down_ref(preview_windows,:).*g+zzmp_ref_reduce-(zf_c-zeta_down_ref(preview_windows,:).*Px_ddc*[zc(i);zdc(i);zddc(i)]);
 
     
     
@@ -201,15 +201,15 @@
 
 %% Constraint Last Capture point in convex hull
     no_double_support_capture=(sum(Px_step_ref==1,2)==1);
-    no_double_support_capture=no_double_support_capture(1+(i-1):N+(i-1),:);
+    no_double_support_capture=no_double_support_capture(preview_windows,:);
     no_double_support_capture(1:end-1,:)=[no_double_support_capture(1:end-1,:)==2];
 
     if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='r'
-        right_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        left_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        right_support_capture=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
+        left_support_capture=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
     elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce=='r'|phase_type_sampling_reduce=='l',1)]))=='l'
-        right_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        left_support_capture=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        right_support_capture=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
+        left_support_capture=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
     else
         right_support_capture=false(size(no_double_support_capture));
         left_support_capture=false(size(no_double_support_capture));

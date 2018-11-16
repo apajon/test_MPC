@@ -36,28 +36,28 @@ H_Pu=w1*H_dz+w2*H_dc;
 
 %     no_double_support=any(phase_type_sampling_reduce~='b',2);
 no_double_support=(sum(Px_step_ref==1,2)==1);
-no_double_support=no_double_support(1+(i-1):N+(i-1),:);
+no_double_support=no_double_support(preview_windows,:);
     
 %     right_support=any(phase_type_sampling_reduce=='r',2);
 %     left_support=any(phase_type_sampling_reduce=='l',2);
 if phase_type(2)=='r'
     if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        left_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
+        right_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
     elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        right_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
+        left_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
     else
         right_support=false(size(no_double_support));
         left_support=false(size(no_double_support));
     end
 elseif phase_type(2)=='l'
     if phase_type_sampling_reduce(1)=='r' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='r'
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
+        right_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
+        left_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
     elseif phase_type_sampling_reduce(1)=='l' || phase_type_sampling_reduce(max([1 find(phase_type_sampling_reduce~='b',1)]))=='l'
-        left_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),2:2:end)==1,2),2);
-        right_support=any(sum(Px_step_ref(1+(i-1):N+(i-1),1:2:end)==1,2),2);
+        left_support=any(sum(Px_step_ref(preview_windows,2:2:end)==1,2),2);
+        right_support=any(sum(Px_step_ref(preview_windows,1:2:end)==1,2),2);
     else
         right_support=false(size(no_double_support));
         left_support=false(size(no_double_support));
@@ -96,13 +96,13 @@ if isempty(Pu_step)
 %add Cost com heigth and min jerk
 zf_c=Px_c*[zc(i);zdc(i);zddc(i)];
 
-zzmp_ref_reduce=zzmp_ref(1+(i-1):N+(i-1),:);
-hcom_ref_reduce=hcom_ref(1+(i-1):N+(i-1),:);
-hcom_ref_max_reduce=hcom_ref_max(1+(i-1):N+(i-1),:);
+zzmp_ref_reduce=zzmp_ref(preview_windows,:);
+hcom_ref_reduce=hcom_ref(preview_windows,:);
+hcom_ref_max_reduce=hcom_ref_max(preview_windows,:);
 %     if i<10
 %         hcom_ref_reduce=0.8;
 %     elseif i<120
-%         hcom_ref_reduce=0.95;%h_com+h_com_max;%hcom_ref(1+(i-1):N+(i-1),:);
+%         hcom_ref_reduce=0.95;%h_com+h_com_max;%hcom_ref(preview_windows,:);
 %     else
 %         hcom_ref_reduce=0.8;
 %     end

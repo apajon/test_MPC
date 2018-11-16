@@ -1,5 +1,7 @@
 %% foot traj in the air
-hstep_move=0.05;
+% hstep_move=0.05;
+% % hstep_move=0.2;
+% hstep_move_mid=0.07;
 
 pstep=[xstep ystep];
 pstep_3d=[pstep zstep];
@@ -33,9 +35,9 @@ for k=1:size(pstep_3d,1)-2
     end
     
     if pstep_3d(k+1,3)>pstep_3d(k+2,3)
-        xpstep_viapoint(2,k)=pstep_3d(k+2,1);
-        ypstep_viapoint(2,k)=pstep_3d(k,2)+(pstep_3d(k+2,2)-pstep_3d(k,2))*3/4;
-        zpstep_viapoint(2,k)=pstep_3d(k+1,3)+hstep_move;
+        xpstep_viapoint(3,k)=pstep_3d(k+2,1);
+        ypstep_viapoint(3,k)=pstep_3d(k,2)+(pstep_3d(k+2,2)-pstep_3d(k,2))*3/4;
+        zpstep_viapoint(3,k)=pstep_3d(k+1,3)+hstep_move;
     elseif pstep_3d(k+1,3)<pstep_3d(k+2,3)
         xpstep_viapoint(3,k)=pstep_3d(k+1,1);
         ypstep_viapoint(3,k)=pstep_3d(k,2)+(pstep_3d(k+2,2)-pstep_3d(k,2))*3/4;
