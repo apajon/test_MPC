@@ -4,7 +4,7 @@ clc
 
 addpath script/ function/
 
-walking_type=1;
+walking_type=2;
 % 1 : walking flat
 % 2 : walking airbus stairs
 % 3 : walking flat quick
@@ -27,7 +27,7 @@ run('script/script_phase_duration.m')
 run('script/script_ref.m')
 
 %% ZMP COM Linear form
-COM_form='com jerk'
+COM_form='poly expo'
 %'com jerk' : COM with piece-wise jerk
 %'zmp vel' : ZMP with piece-wise velocity
 %'poly expo' : 2nd poly of exponential
@@ -76,7 +76,7 @@ switch(walking_type)
     case {4,5}
         w2=10^0; %com vel ref
 end
-w3=10^2; %zmp wth zeta mean close to step
+w3=10^-1; %zmp wth zeta mean close to step
 w4=10^-2; %com height
 
 w5=10^-1*0; %zmp acceleration aka COM acceleration
@@ -150,12 +150,12 @@ for i=1:phase_duration_iteration_cumul(end)
     
     %% Cost
     switch(COM_form)
-        case 'com jerk'
+        case {'com jerk','poly expo'}
             run('script/script_update_cost_comJerk.m')
         case 'zmp vel'
             run('script/script_update_cost_zmpVel.m')
-        case 'poly expo'
-            error('script_update_cost_polyExpo.m not define')
+%         case 'poly expo'
+%             error('script_update_cost_polyExpo.m not define')
         otherwise
             error('Bad COM_form')
     end
@@ -248,9 +248,9 @@ run('script/script_zmp.m')
 
 %% foot traj in the air
 % hstep_move=0.05;
-hstep_move=0.2;
-run('script/script_foot_traj_air.m')
-% run('script/script_foot_traj_air_stairs.m')
+hstep_move=0.05;
+% run('script/script_foot_traj_air.m')
+run('script/script_foot_traj_air_stairs.m')
 
 %% discretization trajectories
 run('script/script_traj_discretization.m')

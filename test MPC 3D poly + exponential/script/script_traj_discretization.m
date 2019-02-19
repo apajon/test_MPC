@@ -32,6 +32,40 @@ switch(COM_form)
                 zdc_discret=[zdc_discret;dt*[zc(i);zdc(i);zddc(i)]+dddt.^2/2*zdddc_storage(i)];
                 zddc_discret=[zddc_discret;ddt*[zc(i);zdc(i);zddc(i)]+dddt*zdddc_storage(i)];
             end
+        case 'poly expo'
+            xc_discret=[xc(1)];
+            xdc_discret=[xdc(1)];
+            xddc_discret=[xddc(1)];
+
+            yc_discret=[yc(1)];
+            ydc_discret=[ydc(1)];
+            yddc_discret=[yddc(1)];
+
+            zc_discret=[zc(1)];
+            zdc_discret=[zdc(1)];
+            zddc_discret=[zddc(1)];
+            for i=1:size(xdddc_storage,1)
+                et=exp(-omega_temp*[1/frequency:1/frequency:phase_duration_sampling(i)]');
+                
+                t=[1/2*(et.^2-4*et+3)*omega_temp^-1 1/2*(et-1).^2*omega_temp^-2];
+                t=[ones(size(t,1),1) t];
+                dt=[zeros(size(t,1),1) et.*(2-et) et.*(1-et)*omega_temp^-1];                
+                ddt=[zeros(size(t,1),1) 2*et.*(et-1)*omega_temp et.*(2*et-1)];
+                dddt=repmat((et.^-1-1),1,3).*[(et-1).^2 (1-et).*(2*et+1)*omega_temp (4*et.^2+et+1)*omega_temp^2];
+
+            
+                xc_discret=[xc_discret;t*[xc(i);xdc(i);xddc(i)]+dddt(:,1)*xdddc_storage(i)];
+                xdc_discret=[xdc_discret;dt*[xc(i);xdc(i);xddc(i)]+dddt(:,2)*xdddc_storage(i)];
+                xddc_discret=[xddc_discret;ddt*[xc(i);xdc(i);xddc(i)]+dddt(:,3)*xdddc_storage(i)];
+
+                yc_discret=[yc_discret;t*[yc(i);ydc(i);yddc(i)]+dddt(:,1)*ydddc_storage(i)];
+                ydc_discret=[ydc_discret;dt*[yc(i);ydc(i);yddc(i)]+dddt(:,2)*ydddc_storage(i)];
+                yddc_discret=[yddc_discret;ddt*[yc(i);ydc(i);yddc(i)]+dddt(:,3)*ydddc_storage(i)];
+
+                zc_discret=[zc_discret;t*[zc(i);zdc(i);zddc(i)]+dddt(:,1)*zdddc_storage(i)];
+                zdc_discret=[zdc_discret;dt*[zc(i);zdc(i);zddc(i)]+dddt(:,2)*zdddc_storage(i)];
+                zddc_discret=[zddc_discret;ddt*[zc(i);zdc(i);zddc(i)]+dddt(:,3)*zdddc_storage(i)];
+            end
         case 'zmp vel'
             xc_discret=[xc(1)];
             xdc_discret=[xdc(1)];
@@ -64,6 +98,8 @@ switch(COM_form)
                 zdc_discret=[zdc_discret;dt*[zc(i);zdc(i);zddc(i)]+dddt(:,2)*zdddc_storage(i)];
                 zddc_discret=[zddc_discret;ddt*[zc(i);zdc(i);zddc(i)]+dddt(:,3)*zdddc_storage(i)];
             end
+        otherwise
+            error('Bad COM_form')
     end
 
 

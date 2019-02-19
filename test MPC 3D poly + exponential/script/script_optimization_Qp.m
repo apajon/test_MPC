@@ -26,7 +26,7 @@ switch(COM_form)
         if false
             run('script/script_display_online.m')
         end 
-    case 'zmp vel'
+    case {'zmp vel', 'poly expo'}
         xdddc_storage=[xdddc_storage;QP_result_all{i}(1)];
         ydddc_storage=[ydddc_storage;QP_result_all{i}(size(A_zmp,2)/2+1)];
         zdddc_storage=[zdddc_storage;QP_result_all{i}(size(A_zmp,2)+1)];

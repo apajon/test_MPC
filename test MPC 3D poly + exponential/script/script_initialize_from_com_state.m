@@ -8,6 +8,10 @@ switch(COM_form)
 
     case 'zmp vel'
         [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_zmpVel(ones(N,1)*zeta_temp,phase_duration_sampling(preview_windows,:),N);
+    case 'poly expo'
+        [Px_c,Pu_c,Px_dc,Pu_dc,Px_ddc,Pu_ddc]=function_compute_com_linear_polyExpo(ones(N,1)*zeta_temp,phase_duration_sampling(preview_windows,:),N);
+    otherwise
+        error('Bad COM_form')
 end
 
 H_c=Pu_c.'*Pu_c;

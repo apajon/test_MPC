@@ -135,7 +135,7 @@ yankmax=2*inttoankle+0.4;%width max between ankles
 %% COM height limits to the floor
 switch(walking_type)
     case 1
-        h_com_max=+0.0317;
+        h_com_max=+0.01;
         h_com_min=-0.25;
 %         h_com_max=+0.0317;
 %         h_com_min=-0.25;

@@ -66,31 +66,31 @@ end
 
 
 if isempty(Pu_step)
-        xH=H_Pu+w3*H_z_mean;
+    xH=H_Pu+w3*H_z_mean;
 
-        xf=w2*Pu_dc.'*(xf_dc-xf_dc_ref)...
-            +w3*Pu_z_mean.'*(xf_z_mean-(xf_step+xtranslate_step));
-        
-        yf=w2*Pu_dc.'*(yf_dc-yf_dc_ref)...
-            +w3*Pu_z_mean.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step));
-    else
-        xH=[H_Pu+w3*H_z_mean -w3*Pu_z_mean.'*Pu_step;...
-            (-w3*Pu_z_mean.'*Pu_step).' w3*H_step];
-        
-        xf=[w2*Pu_dc.'*(xf_dc-xf_dc_ref)+...
-            w3*Pu_z_mean.'*(xf_z_mean-(xf_step+xtranslate_step));...
-            -w3*Pu_step.'*(xf_z_mean-(xf_step+xtranslate_step))];
-        
-        yf=[w2*Pu_dc.'*(yf_dc-yf_dc_ref)+...
-            w3*Pu_z_mean.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step));...
-            -w3*Pu_step.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step))];
-    end
-    
-    yH=xH;
-    
-    H=blkdiag(xH,yH);
-    
-    f=[xf;yf];
+    xf=w2*Pu_dc.'*(xf_dc-xf_dc_ref)...
+        +w3*Pu_z_mean.'*(xf_z_mean-(xf_step+xtranslate_step));
+
+    yf=w2*Pu_dc.'*(yf_dc-yf_dc_ref)...
+        +w3*Pu_z_mean.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step));
+else
+    xH=[H_Pu+w3*H_z_mean -w3*Pu_z_mean.'*Pu_step;...
+        (-w3*Pu_z_mean.'*Pu_step).' w3*H_step];
+
+    xf=[w2*Pu_dc.'*(xf_dc-xf_dc_ref)+...
+        w3*Pu_z_mean.'*(xf_z_mean-(xf_step+xtranslate_step));...
+        -w3*Pu_step.'*(xf_z_mean-(xf_step+xtranslate_step))];
+
+    yf=[w2*Pu_dc.'*(yf_dc-yf_dc_ref)+...
+        w3*Pu_z_mean.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step));...
+        -w3*Pu_step.'*(yf_z_mean-(yf_step+(left_support-right_support)*ytranslate_step))];
+end
+
+yH=xH;
+
+H=blkdiag(xH,yH);
+
+f=[xf;yf];
     
 %%
 %add Cost com heigth and min jerk

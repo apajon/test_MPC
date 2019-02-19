@@ -7,10 +7,10 @@ vcom_change=round(size(xvcom_ref,1)*1/3)+16;
 
 switch(walking_type)
     case 1
-%         vcom_1=0.315; %m.s^-1
-%         vcom_2=0.315; %m.s^-1
-        vcom_1=0.6; %m.s^-1
-        vcom_2=0.6; %m.s^-1
+        vcom_1=0.315; %m.s^-1
+        vcom_2=0.315; %m.s^-1
+%         vcom_1=0.6; %m.s^-1
+%         vcom_2=0.6; %m.s^-1
     case 2
         vcom_1=0.315; %m.s^-1
         vcom_2=0.315; %m.s^-1
