@@ -3,8 +3,8 @@ z_ankle=0.093;
 % z_ankle=0;
 z_diff_c_hip=0.00;
 z_decalage_tot=z_ankle+z_diff_c_hip;
-z_leg_max=h_com+h_com_max-z_decalage_tot;
-z_leg_min=z_leg_max-(h_com_max-h_com_min);
+z_leg_max=robot.h_com+robot.h_com_max-z_decalage_tot;
+z_leg_min=z_leg_max-(robot.h_com_max-robot.h_com_min);
 
 
 

@@ -4,25 +4,12 @@ clc
 
 addpath script/ function/ classdef/
 
+%%
 robot_type='human';
 %hrp4
 %human
 
-phase_duration_type=1;
-
-%% Sampling time
-% T=5*10^-3;
-% N=300;
-
-% T=5*10^-2;
-% N=30;
-
-N_r=7;
-N_l=7;
-N_b=1;
-N_start=14*3;
-N_stop=24;
-% N=N_r+N_l+N_b*2;
+phase_duration_type='phase_duration_01';
 
 walking_type=1;
 % 1 : walking flat
@@ -42,7 +29,21 @@ cop_ref_type='ankle_center';
 polyhedron_type='waist_center';
 %'ankle_center' : polyhedron centered on the ankle
 %'foot_center' : polyhedron centered on the middle of the foot
-%'waist_center' : polyhedron centered on the middle of the waist    
+%'waist_center' : polyhedron centered on the middle of the waist   
+
+kinematic_limit='hexagonTranslation';
+%'' : very simple polyhedron
+%'hexagon' : hexagon kinematic limits
+%'hexagonTranslation' : hexagon kinematic limits with translation
+
+COM_form='poly expo' 
+%'com jerk' : COM with piece-wise jerk
+%'zmp vel' : ZMP with piece-wise velocity
+%'poly expo' : 2nd poly of exponential
+
+%b = both feet; r = right foot; l = left foot
+nb_foot_step=4;
+firstSS='r';
 
 save_figure=false;
 
@@ -55,16 +56,8 @@ run('script/script_phase_duration.m')
 %% COM vel ref
 run('script/script_ref.m')
 
-%% ZMP COM Linear form
-COM_form='poly expo'
-%'com jerk' : COM with piece-wise jerk
-%'zmp vel' : ZMP with piece-wise velocity
-%'poly expo' : 2nd poly of exponential
 
 %% Polyhedron limits
-kinematic_limit='hexagonTranslation';
-%'' : very simple polyhedron
-%'hexagon' : hexagon kinematic limits
 switch kinematic_limit
     case ''
         number_level=[];
@@ -119,133 +112,23 @@ end
 %% Optimization problem QP
 % Sampling update
 tic
-for i=1:phase_duration_iteration_cumul(end)
-    i
-    if i>=48
-        i
-    end
-    
-    N=1;
-    t=phase_duration_sampling(i);
-    while(t<preview_windows_duration)
-        t=t+phase_duration_sampling(i+N);
-        N=N+1;
-    end
-    
-    preview_windows=1+(i-1):N+(i-1);
-%     preview_windows=1+(i):N+(i);
-    %%
+for i=1:experiment.phase_duration_iteration_cumul(end)
+    %% creation of inputs of a MPC iteration 
+    MPC_inputs=classdef_quadratic_problem_inputs;
     run('script/script_problem_iteration_creation.m')
     
-    %% Initialization from last robot state
-    run('script/script_initialize_from_current_state.m')
+    %% linear MPC iteration
+    MPC_outputs=function_MPC_iteration(MPC_inputs);
     
-    %% Cost
-%     switch(COM_form)
-%         case {'com jerk','poly expo'}
-%             run('script/script_update_cost_comJerk.m')
-%         case 'zmp vel'
-%             run('script/script_update_cost_zmpVel.m')
-% %         case 'poly expo'
-% %             error('script_update_cost_polyExpo.m not define')
-%         otherwise
-%             error('Bad COM_form')
-%     end
+    %%
+    if false
+        run('script/script_display_online.m')
+    end 
     
-    run('script/script_update_cost.m')
-    
-    
-    %% Constraint Inequalities
-%     switch(COM_form)
-%         case 'com jerk'
-%             run('script/script_cons_ineq_comJerk.m')
-%         case 'zmp vel'
-%             run('script/script_cons_ineq_zmpVel.m')
-%     end
-    run('script/script_cons_ineq_zmpVel.m')
-    
-    %% Constraint Equalities
-%     switch(COM_form)
-%         case 'com jerk'
-%             run('script/script_cons_eq_comJerk.m')
-%         case 'zmp vel'
-%             run('script/script_cons_eq_zmpVel.m')
-%     end
-    run('script/script_cons_eq_comJerk.m')
-    
-    %% constraints
-    lb=[];ub=[];x0=[];
+    %% Store MPC results
+    MPC_outputs_storage.add_storage(MPC_outputs);
 
-    %% Options
-%     options=optimoptions('quadprog','Display','iter','MaxIterations',1000);
-    options=optimoptions('quadprog','Display','final');
-%     options=optimoptions('quadprog','Display','off');
-
-    %% Optimization QP
-    run('script/script_optimization_Qp.m')
-%     
-%     figure(1)
-%     clf
-%     title('MPC COM trajectory')
-%     xlabel('t [s]') % x-axis label
-%     ylabel('position [m]') % y-axis label
-%     axis([0 16 -0.5 4])
-%     hold on
-%     plot([0;phase_duration_sampling_cumul(1:i)],xc(1:i+1),'b')
-%     plot([0;phase_duration_sampling_cumul(1:i)],yc(1:i+1),'g')
-%     plot([0;phase_duration_sampling_cumul(1:i)],zc(1:i+1),'k')
-%     plot(phase_duration_sampling_cumul(i:i+N-1),xf_c+Pu_c*QP_result_all{i}(1:N),'r')
-%     plot(phase_duration_sampling_cumul(i:i+N-1),yf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),'r')
-%     plot(phase_duration_sampling_cumul(i:i+N-1),zf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N),'r')
-%     legend('x coordinate','y coordinate','z coordinate','preview MPC','Location','northwest')
-%     hold off
-%     
-%     figure(2)
-%     clf
-%     title('MPC CoP trajectory')
-%     xlabel('t [s]') % x-axis label
-%     ylabel('position [m]') % y-axis label
-%     axis([0 16 -0.5 4])
-%     hold on
-%     plot([0;phase_duration_sampling_cumul(1:i)],1*xc+0*xdc-(zc-zzmp_ref(1:i+1))./(zddc+g).*xddc,'b')
-%     plot([0;phase_duration_sampling_cumul(1:i)],1*yc+0*ydc-(zc-zzmp_ref(1:i+1))./(zddc+g).*yddc,'g')
-%     plot([0;phase_duration_sampling_cumul(1:i)],zzmp_ref(1:i+1),'k')
-%     plot(phase_duration_sampling_cumul(i:i+N-1),xf_c+Pu_c*QP_result_all{i}(1:N)-...
-%         (zf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)-zzmp_ref(i+1:i+N))./...
-%         (zf_ddc+Pu_ddc*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)+g).*...
-%         (xf_ddc+Pu_ddc*QP_result_all{i}(1:N)),'r')
-%     plot(phase_duration_sampling_cumul(i:i+N-1),yf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N)-...
-%         (zf_c+Pu_c*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)-zzmp_ref(i+1:i+N))./...
-%         (zf_ddc+Pu_ddc*QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N)+g).*...
-%         (yf_ddc+Pu_ddc*QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N)),'r')
-%     plot(phase_duration_sampling_cumul(i:i+N-1),zzmp_ref(i+1:i+N),'r')
-%     legend('x coordinate','y coordinate','z coordinate','preview MPC','Location','northwest')
-%     hold off
-
-    
-    figure(1)
-    clf
-    title('MPC COM trajectory')
-    xlabel('t [s]') % x-axis label
-    ylabel('position [m]') % y-axis label
-    axis([0 16 -0.5 4])
-    hold on
-    plot([0;phase_duration_sampling_cumul(1:i)],MPC_outputs_storage.xc(1:i+1),'b')
-    plot([0;phase_duration_sampling_cumul(1:i)],MPC_outputs_storage.yc(1:i+1),'g')
-    plot([0;phase_duration_sampling_cumul(1:i)],MPC_outputs_storage.zc(1:i+1),'k')
-    plot(phase_duration_sampling_cumul(i:i+N-1),COM_state_preview.f_c(:,1)+COM_state_preview.Pu_c*MPC_outputs_storage.QP_result_all{i}(1:N),'r')
-    plot(phase_duration_sampling_cumul(i:i+N-1),COM_state_preview.f_c(:,2)+COM_state_preview.Pu_c*MPC_outputs_storage.QP_result_all{i}(size(A_zmp,2)/2+1:size(A_zmp,2)/2+N),'r')
-    plot(phase_duration_sampling_cumul(i:i+N-1),COM_state_preview.f_c(:,3)+COM_state_preview.Pu_c*MPC_outputs_storage.QP_result_all{i}(size(A_zmp,2)+1:size(A_zmp,2)+N),'r')
-    legend('x coordinate','y coordinate','z coordinate','preview MPC','Location','northwest')
-    hold off
-    
-    if movie_record
-        F_COM=getframe(figure(1));
-        F_CoP=getframe(figure(2));
-        
-        writeVideo(v_COM,F_COM);
-        writeVideo(v_CoP,F_CoP);
-    end
+    run('script/script_movie_record.m')
 end
 toc
 

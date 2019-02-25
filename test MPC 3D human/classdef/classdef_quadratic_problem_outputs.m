@@ -33,9 +33,9 @@ classdef classdef_quadratic_problem_outputs<handle
             %empty constructor
         end
         %%
-        function obj=update_properties(obj,MPC_inputs,COM_state_preview,COM_form)
+        function obj=update_properties(obj,MPC_inputs,COM_state_preview)
             %%
-            switch(COM_form)
+            switch(MPC_inputs.COM_form)
                 case 'com jerk'
                     obj.xdddc_storage=obj.QP_result_all(1);
                     obj.ydddc_storage=obj.QP_result_all((size(obj.QP_result_all,1)-MPC_inputs.N)/2+1);

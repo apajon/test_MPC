@@ -1,5 +1,8 @@
 classdef classdef_quadratic_problem_inputs<handle
     properties
+        g %gravity acceleration constant
+        omega_temp
+        
         N %number of sample of the preview window
         phase_duration_sampling %duration of each sample of the preview window
         phase_type_sampling %phase type of each sample of the preview window
@@ -15,7 +18,9 @@ classdef classdef_quadratic_problem_inputs<handle
         Px_step %Px matrix of support foot for the preview window
         
         no_double_support
+        no_double_support_capture
         double_support
+        
         
         phase_type_reduce
         
@@ -40,6 +45,15 @@ classdef classdef_quadratic_problem_inputs<handle
         %'zmp vel' : ZMP with piece-wise velocity
         %'poly expo' : 2nd poly of exponential
         
+        kinematic_limit %COM kinematics limit aka reachable region
+        %'' : very simple polyhedron
+        %'hexagon' : hexagon kinematic limits
+        %'hexagonTranslation' : hexagon kinematic limits with translation
+        
+        plan_hexagon %plan of kinematic limits polyhedron
+        z_leg_min
+        z_decalage_tot
+        
         OptimCostWeight
         
         right_support% 1 if right foot support otherwise 0 at each sample of the preview window
@@ -49,7 +63,14 @@ classdef classdef_quadratic_problem_inputs<handle
         ystep
         zstep
         
+        step_number_pankle_fixed
+        %vector of fixed step position on floor [#step x_step y_step; ...]
+        %if coordinate is NaN, the position along this axis is still free
+        
         zzmp_ref_reduce
+        hcom_ref_max_reduce
+        
+        no_end_constraint
 
     end
     

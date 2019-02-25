@@ -1,6 +1,6 @@
 %% COM vel ref
-xvcom_ref=zeros(phase_duration_iteration_cumul(end),1);
-yvcom_ref=zeros(phase_duration_iteration_cumul(end),1);
+xvcom_ref=zeros(experiment.phase_duration_iteration_cumul(end),1);
+yvcom_ref=zeros(experiment.phase_duration_iteration_cumul(end),1);
 
 % vcom_change=round(size(xvcom_ref,1)*1/2)+4;
 vcom_change=round(size(xvcom_ref,1)*1/3)+16;
@@ -24,11 +24,11 @@ switch(walking_type)
         vcom_1=0; %m.s^-1
         vcom_2=0; %m.s^-1
 end
-xvcom_ref(N_start+1:vcom_change)=xvcom_ref(N_start+1:vcom_change)+vcom_1; %m.s^-1
-xvcom_ref(vcom_change+1:end-N_stop)=xvcom_ref(vcom_change+1:end-N_stop)+vcom_2; %m.s^-1
+xvcom_ref(experiment.N_start+1:vcom_change)=xvcom_ref(experiment.N_start+1:vcom_change)+vcom_1; %m.s^-1
+xvcom_ref(vcom_change+1:end-experiment.N_stop)=xvcom_ref(vcom_change+1:end-experiment.N_stop)+vcom_2; %m.s^-1
 
-xvcom_ref=[xvcom_ref;zeros(size(phase_type_sampling,1)-size(xvcom_ref,1),1)];
-yvcom_ref=[yvcom_ref;zeros(size(phase_type_sampling,1)-size(yvcom_ref,1),1)];
+xvcom_ref=[xvcom_ref;zeros(size(experiment.phase_type_sampling,1)-size(xvcom_ref,1),1)];
+yvcom_ref=[yvcom_ref;zeros(size(experiment.phase_type_sampling,1)-size(yvcom_ref,1),1)];
 
 
 
@@ -77,15 +77,15 @@ end
 %% COM height ref
 hcom_ref=zeros(size(xvcom_ref,1),1);
 
-hcom_ref=hcom_ref+h_com+zzmp_ref;
+hcom_ref=hcom_ref+robot.h_com+zzmp_ref;
 
 hcom_ref_max=hcom_ref;
-hcom_ref_max(11:length(xvcom_ref)-40)=hcom_ref_max(11:length(xvcom_ref)-40)+h_com_max+0.2;
+hcom_ref_max(11:length(xvcom_ref)-40)=hcom_ref_max(11:length(xvcom_ref)-40)+robot.h_com_max+0.2;
 
 %% zeta boundaries ref
-zeta_up_ref=(hcom_ref+h_com_max-zzmp_ref+0.32)/g;
+zeta_up_ref=(hcom_ref+robot.h_com_max-zzmp_ref+0.32)/g;
 
-zeta_down_ref=(hcom_ref+h_com_min-zzmp_ref-0.02)/g;
+zeta_down_ref=(hcom_ref+robot.h_com_min-zzmp_ref-0.02)/g;
 
 % % zeta_up_ref(round(phase_duration(1)/T)+1:vcom_change)=(hcom_ref(round(phase_duration(1)/T)+1:vcom_change)+h_com_max-zzmp_ref(round(phase_duration(1)/T)+1:vcom_change)+0.02)/g; %m.s^-1
 % % zeta_up_ref(vcom_change+1:end-phase_duration_stop/T)=(hcom_ref(vcom_change+1:end-phase_duration_stop/T)+h_com_max-zzmp_ref(vcom_change+1:end-phase_duration_stop/T)+0.32)/g;

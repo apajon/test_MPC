@@ -70,10 +70,10 @@ switch controller
 end
 
 %% Foot limits
-backtoankle=0.098; %from back to ankle of foot
-fronttoankle=0.128; %from  front to ankle of foot
-exttoankle=0.076; %from exterior to ankle of foot
-inttoankle=0.054; %from interior to ankle of foot   
+backtoankle=0.1; %from back to ankle of foot
+fronttoankle=0.13; %from  front to ankle of foot
+exttoankle=0.075; %from exterior to ankle of foot
+inttoankle=0.055; %from interior to ankle of foot
 
 sole_margin=0.02;
 
@@ -85,3 +85,4 @@ yankmin=2*inttoankle+0.0552;%0.15;%width min between ankles
 % yankmin=0.1769
 yankmax=2*inttoankle+0.4;%width max between ankles
 % yankmax=2*inttoankle+0.0552;%width max between ankles
+
