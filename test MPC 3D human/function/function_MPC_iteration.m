@@ -8,10 +8,10 @@ run('script_update_cost.m')
 
 
 %% Constraint Inequalities
-run('script_cons_ineq_zmpVel.m')
+run('script_cons_ineq.m')
 
 %% Constraint Equalities
-run('script_cons_eq_comJerk.m')
+run('script_cons_eq.m')
 
 %% constraints
 lb=[];ub=[];x0=[];

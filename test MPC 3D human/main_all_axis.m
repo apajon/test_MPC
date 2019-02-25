@@ -47,57 +47,15 @@ firstSS='r';
 
 save_figure=false;
 
+movie_record=false;
+
 %% Constant
 run('script/script_constant.m')
-
-%% Phase duration
-run('script/script_phase_duration.m')
-
-%% COM vel ref
-run('script/script_ref.m')
-
-
-%% Polyhedron limits
-switch kinematic_limit
-    case ''
-        number_level=[];
-        run('script/script_polyhedron.m')
-    case 'hexagon'
-        number_level=2;
-        run('script/script_polyhedron_hexagon.m')
-    case 'hexagonTranslation'
-        number_level=2;
-        run('script/script_polyhedron_hexagon_translation.m')
-    otherwise
-        error('choose a type of kinematic_limit')
-end
 
 %% Init storage QP result
 run('script/script_init_storage_qp_result.m')
 
-
-%% Precomputation
-%as Camille
-w1=10^-7; %jerk -7
-w2=10^0; %com vel ref
-switch(walking_type)
-    case {1,2,3}
-        w2=10^0; %com vel ref
-    case {4,5}
-        w2=10^0; %com vel ref
-end
-w3=10^-1; %zmp wth zeta mean close to step
-w4=10^-2; %com height
-
-w5=10^-1*0; %zmp acceleration aka COM acceleration
-w6=10^-2*0; %zmp vel between segment
-
-OptimCostWeight=[w1 w2 w3 w4 w5 w6];
-
 %% movie record
-converge_sampling=[];
-QP_result_all=[];
-movie_record=false;
 if movie_record  
     v_COM = VideoWriter('COM_MPC.avi');
     v_COM.Quality = 95;
@@ -120,14 +78,11 @@ for i=1:experiment.phase_duration_iteration_cumul(end)
     %% linear MPC iteration
     MPC_outputs=function_MPC_iteration(MPC_inputs);
     
-    %%
-    if false
-        run('script/script_display_online.m')
-    end 
-    
     %% Store MPC results
     MPC_outputs_storage.add_storage(MPC_outputs);
 
+    %%
+%     run('script/script_display_online.m')
     run('script/script_movie_record.m')
 end
 toc

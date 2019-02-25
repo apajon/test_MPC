@@ -26,9 +26,9 @@ MPC_outputs_storage.zddc(1)=robot.zcom_0(3);
 if experiment.phase_type(2)=='r'
     MPC_outputs_storage.xstep=[robot.xstep_l_0;robot.xstep_r_0];
     MPC_outputs_storage.ystep=[robot.ystep_l_0;robot.ystep_r_0];
-    MPC_outputs_storage.zstep=[zstep_l_0;zstep_r_0];
+    MPC_outputs_storage.zstep=[experiment.zstep_l_0;experiment.zstep_r_0];
 elseif experiment.phase_type(2)=='l'
     MPC_outputs_storage.xstep=[robot.xstep_r_0;robot.xstep_l_0];
     MPC_outputs_storage.ystep=[robot.ystep_r_0;robot.ystep_l_0];
-    MPC_outputs_storage.zstep=[zstep_r_0;zstep_l_0];
+    MPC_outputs_storage.zstep=[experiment.zstep_r_0;experiment.zstep_l_0];
 end

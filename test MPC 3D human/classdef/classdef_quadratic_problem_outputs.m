@@ -77,7 +77,7 @@ classdef classdef_quadratic_problem_outputs<handle
             if (MPC_inputs.phase_type_sampling(1)~='b'&&MPC_inputs.phase_type_sampling(1)~="start"&&MPC_inputs.phase_type_sampling(1)~="stop") && (MPC_inputs.phase_type_sampling(2)=='b'||MPC_inputs.phase_type_sampling(2)=="start"||MPC_inputs.phase_type_sampling(2)=="stop")
                 obj.xstep=[obj.xstep;obj.QP_result_all(MPC_inputs.N+1)];
                 obj.ystep=[obj.ystep;obj.QP_result_all((size(obj.QP_result_all,1)-MPC_inputs.N)/2+MPC_inputs.N+1)];
-                obj.zstep=[obj.zstep;MPC_inputs.zzmp_ref_reduce(3)];
+                obj.zstep=[obj.zstep;MPC_inputs.zfloor_ref_reduce(3)];
             end 
         end
         %%

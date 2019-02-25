@@ -1,5 +1,5 @@
 %% Results ZMP
-zz=[zzmp_ref(1);zzmp_ref(1:end-1)];
+zz=[experiment.zfloor_ref(1);experiment.zfloor_ref(1:end-1)];
 zz(length(zc)+1:end)=[];
 xz=1*xc+0*xdc-(zc-zz)./(zddc+g).*xddc;
 yz=1*yc+0*ydc-(zc-zz)./(zddc+g).*yddc;

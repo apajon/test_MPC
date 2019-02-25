@@ -67,7 +67,7 @@ classdef classdef_quadratic_problem_inputs<handle
         %vector of fixed step position on floor [#step x_step y_step; ...]
         %if coordinate is NaN, the position along this axis is still free
         
-        zzmp_ref_reduce
+        zfloor_ref_reduce
         hcom_ref_max_reduce
         
         no_end_constraint
