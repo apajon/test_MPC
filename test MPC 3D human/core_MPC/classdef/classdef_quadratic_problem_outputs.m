@@ -84,27 +84,27 @@ classdef classdef_quadratic_problem_outputs<handle
         function obj=add_storage(obj,outputs)
             obj.QP_result_all{size(obj.QP_result_all,2)+1}=outputs.QP_result_all;
             
-            obj.converge_sampling(end+1)=outputs.converge_sampling;
+            obj.converge_sampling(end+1,:)=outputs.converge_sampling;
             
-            obj.xdddc_storage(end+1)=outputs.xdddc_storage;
-            obj.xc(end+1)=outputs.xc;
-            obj.xdc(end+1)=outputs.xdc;
-            obj.xddc(end+1)=outputs.xddc;
+            obj.xdddc_storage(end+1,:)=outputs.xdddc_storage;
+            obj.xc(end+1,:)=outputs.xc;
+            obj.xdc(end+1,:)=outputs.xdc;
+            obj.xddc(end+1,:)=outputs.xddc;
 
-            obj.ydddc_storage(end+1)=outputs.ydddc_storage;
-            obj.yc(end+1)=outputs.yc;
-            obj.ydc(end+1)=outputs.ydc;
-            obj.yddc(end+1)=outputs.yddc;
+            obj.ydddc_storage(end+1,:)=outputs.ydddc_storage;
+            obj.yc(end+1,:)=outputs.yc;
+            obj.ydc(end+1,:)=outputs.ydc;
+            obj.yddc(end+1,:)=outputs.yddc;
 
-            obj.zdddc_storage(end+1)=outputs.zdddc_storage;
-            obj.zc(end+1)=outputs.zc;
-            obj.zdc(end+1)=outputs.zdc;
-            obj.zddc(end+1)=outputs.zddc;
+            obj.zdddc_storage(end+1,:)=outputs.zdddc_storage;
+            obj.zc(end+1,:)=outputs.zc;
+            obj.zdc(end+1,:)=outputs.zdc;
+            obj.zddc(end+1,:)=outputs.zddc;
 
             if ~isempty(outputs.xstep)
-                obj.xstep(end+1)=outputs.xstep;
-                obj.ystep(end+1)=outputs.ystep;
-                obj.zstep(end+1)=outputs.zstep;
+                obj.xstep(end+1,:)=outputs.xstep;
+                obj.ystep(end+1,:)=outputs.ystep;
+                obj.zstep(end+1,:)=outputs.zstep;
             end
             
         end

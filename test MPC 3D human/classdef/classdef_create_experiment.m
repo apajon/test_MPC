@@ -51,11 +51,16 @@ classdef classdef_create_experiment<handle
         z_leg_min
         z_decalage_tot
         
+        translate_step_polyhedron_type
+        
         OptimCostWeight
         
         step_number_pankle_fixed
         
         vcom_ref
+        vcom_change
+        vcom_1
+        vcom_2
         
         zfloor_ref
         
@@ -81,7 +86,7 @@ classdef classdef_create_experiment<handle
         
         function obj=classdef_create_experiment_test(obj,phase_duration_type,...
                 nb_foot_step,firstSS,...
-                kinematic_limit,robot,...
+                kinematic_limit,robot,polyhedron_position,...
                 optimweight_filename,...
                 walking_type)
             %% Mechanics
@@ -99,7 +104,7 @@ classdef classdef_create_experiment<handle
             obj.generate_phase_decoupling();
             
             %% ref
-            obj.generate_kinematic_limit(kinematic_limit,robot);
+            obj.generate_kinematic_limit(kinematic_limit,robot,polyhedron_position);
             
             obj.generate_optimCostWeight(optimweight_filename);
             
@@ -281,7 +286,7 @@ classdef classdef_create_experiment<handle
             
             obj.Px_step_ref=Px_step_ref_;
         end
-        function obj=generate_kinematic_limit(obj,kinematic_limit,robot)
+        function obj=generate_kinematic_limit(obj,kinematic_limit,robot,polyhedron_position)
             %% Polyhedron limits
             switch kinematic_limit
                 case ''
@@ -300,6 +305,23 @@ classdef classdef_create_experiment<handle
             obj.plan_hexagon=plan_hexagon;
             obj.z_leg_min=z_leg_min;
             obj.z_decalage_tot=z_decalage_tot;
+            
+            switch(polyhedron_position)
+                case 'ankle_center'
+                     obj.translate_step_polyhedron_type=[0 0];
+                case 'foot_center'
+                     obj.translate_step_polyhedron_type=[(fronttoankle+backtoankle)/2-backtoankle ...
+                         -((exttoankle+inttoankle)/2-inttoankle)];
+                case 'waist_center'
+                     obj.translate_step_polyhedron_type=[0 0.06845];
+                 otherwise
+                    msg='Bad choice of polyhedron_type \n';
+                    msg1='ankle_center \n';
+                    msg2='foot_center \n';
+                    msg3='waist_center \n';
+                    errormsg=[msg msg1 msg2 msg3];
+                    error(errormsg,[])
+            end
         end
         function obj=generate_optimCostWeight(obj,optimweight_filename)
             run(optimweight_filename)
@@ -323,29 +345,29 @@ classdef classdef_create_experiment<handle
             yvcom_ref_=zeros(obj.phase_duration_iteration_cumul(end),1);
 
             % vcom_change=round(size(xvcom_ref,1)*1/2)+4;
-            vcom_change=round(size(xvcom_ref_,1)*1/3)+16;
+            vcom_change_=round(size(xvcom_ref_,1)*1/3)+16;
 
             switch(walking_type)
                 case 1
-                    vcom_1=0.315; %m.s^-1
-                    vcom_2=0.315; %m.s^-1
+                    vcom_1_=0.315; %m.s^-1
+                    vcom_2_=0.315; %m.s^-1
             %         vcom_1=0.6; %m.s^-1
             %         vcom_2=0.6; %m.s^-1
                 case 2
-                    vcom_1=0.315; %m.s^-1
-                    vcom_2=0.315; %m.s^-1
+                    vcom_1_=0.315; %m.s^-1
+                    vcom_2_=0.315; %m.s^-1
                 case 3
-                    vcom_1=0.6; %m.s^-1
-                    vcom_2=1.2; %m.s^-1
+                    vcom_1_=0.6; %m.s^-1
+                    vcom_2_=1.2; %m.s^-1
                 case 4
-                    vcom_1=0; %m.s^-1
-                    vcom_2=0; %m.s^-1
+                    vcom_1_=0; %m.s^-1
+                    vcom_2_=0; %m.s^-1
                 case 5
-                    vcom_1=0; %m.s^-1
-                    vcom_2=0; %m.s^-1
+                    vcom_1_=0; %m.s^-1
+                    vcom_2_=0; %m.s^-1
             end
-            xvcom_ref_(obj.N_start+1:vcom_change)=xvcom_ref_(obj.N_start+1:vcom_change)+vcom_1; %m.s^-1
-            xvcom_ref_(vcom_change+1:end-obj.N_stop)=xvcom_ref_(vcom_change+1:end-obj.N_stop)+vcom_2; %m.s^-1
+            xvcom_ref_(obj.N_start+1:vcom_change_)=xvcom_ref_(obj.N_start+1:vcom_change_)+vcom_1_; %m.s^-1
+            xvcom_ref_(vcom_change_+1:end-obj.N_stop)=xvcom_ref_(vcom_change_+1:end-obj.N_stop)+vcom_2_; %m.s^-1
 
             xvcom_ref_=[xvcom_ref_;zeros(size(obj.phase_type_sampling,1)-size(xvcom_ref_,1),1)];
             yvcom_ref_=[yvcom_ref_;zeros(size(obj.phase_type_sampling,1)-size(yvcom_ref_,1),1)];
@@ -354,6 +376,10 @@ classdef classdef_create_experiment<handle
 %             obj.yvcom_ref=yvcom_ref_;
 
             obj.vcom_ref=[xvcom_ref_ yvcom_ref_];
+            obj.vcom_change=vcom_change_;
+            obj.vcom_1=vcom_1_;
+            obj.vcom_2=vcom_2_;
+
             %% ZMP height ref
             % zzmp_ref=zeros(round(max(phase_duration_cumul)/T+N),1);
             % zzmp_ref(round(phase_duration_cumul(3)/T)+1:round(phase_duration_cumul(5)/T))=0.5;

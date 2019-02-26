@@ -96,22 +96,7 @@ switch(cop_ref_type)
 end
 
 %% translation from ankle position to polyhedron of COM reachable region center along axis [x y]
-switch(polyhedron_type)
-    case 'ankle_center'
-         MPC_inputs.translate_step_polyhedron_type=[0 0];
-    case 'foot_center'
-         MPC_inputs.translate_step_polyhedron_type=[(fronttoankle+backtoankle)/2-backtoankle ...
-             -((exttoankle+inttoankle)/2-inttoankle)];
-    case 'waist_center'
-         MPC_inputs.translate_step_polyhedron_type=[0 0.06845];
-     otherwise
-        msg='Bad choice of polyhedron_type \n';
-        msg1='ankle_center \n';
-        msg2='foot_center \n';
-        msg3='waist_center \n';
-        errormsg=[msg msg1 msg2 msg3];
-        error(errormsg,[])
-end
+MPC_inputs.translate_step_polyhedron_type=experiment.translate_step_polyhedron_type;
 
 %%
 if firstSS=='r'

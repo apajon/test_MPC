@@ -31,6 +31,8 @@ for i=1:size(pstep,1)
             y=-inttoankle*mod(i+1,2)-exttoankle*mod(i,2); %corner position
         case 1
             y=-inttoankle*mod(i,2)-exttoankle*mod(i+1,2); %corner position
+        otherwise
+            error('Error occurred. Bad firstSS')
     end
     xv=[x x+w x+w x x];yv=[y y y+h y+h y];
     R=[xv;yv];

@@ -1,15 +1,15 @@
 %% foot traj in the air
-pstep=[xstep ystep];
+pstep=[MPC_outputs_storage.xstep MPC_outputs_storage.ystep];
 psi=zeros(size(pstep,1)*3,1);
-firstSS=(phase_type(2)=='r');
+% firstSS=(experiment.phase_type(2)=='r');
 %%
-pstep_3d=[pstep zstep];
+pstep_3d=[pstep MPC_outputs_storage.zstep];
 pstep_3d_phase_r=[];
 pstep_3d_phase_l=[];
-for i=1:length(phase_type)
-    if phase_type(i)=='b'||phase_type(i)=='start'||phase_type(i)=='stop'
-        if i<length(phase_type)
-            if phase_type(i+1)=='r'
+for i=1:length(experiment.phase_type)
+    if experiment.phase_type(i)=='b'||experiment.phase_type(i)=='start'||experiment.phase_type(i)=='stop'
+        if i<length(experiment.phase_type)
+            if experiment.phase_type(i+1)=='r'
                 pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(2,:);];
                 pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);];
             else
@@ -17,7 +17,7 @@ for i=1:length(phase_type)
                 pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(2,:);];
             end
         else
-            if phase_type(i-1)=='l'
+            if experiment.phase_type(i-1)=='l'
                 pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(2,:);];
                 pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);];
             else
@@ -26,12 +26,12 @@ for i=1:length(phase_type)
             end
         end
     pstep_3d(1,:)=[];
-    elseif phase_type(i)=='r'
+    elseif experiment.phase_type(i)=='r'
         pstep_3d_phase_r=[pstep_3d_phase_r;pstep_3d(1,:);pstep_3d(1,:);];
         pstep_3d_phase_l=[pstep_3d_phase_l;...
             [(pstep_3d_phase_l(end,1:2)+pstep_3d(2,1:2))./2 max(pstep_3d_phase_l(end,3),pstep_3d(2,3))+hstep_move];...
             pstep_3d(2,:);];
-    elseif phase_type(i)=='l'
+    elseif experiment.phase_type(i)=='l'
         pstep_3d_phase_l=[pstep_3d_phase_l;pstep_3d(1,:);pstep_3d(1,:);];
         pstep_3d_phase_r=[pstep_3d_phase_r;...
             [(pstep_3d_phase_r(end,1:2)+pstep_3d(2,1:2))./2 max(pstep_3d_phase_r(end,3),pstep_3d(2,3))+hstep_move];...
@@ -69,19 +69,19 @@ end
 % legend('R foot','Lfoot','Location','southeast')
 
 %%
-phase_type_enlarge=ones(length(phase_type) + length(phase_type(2:2:end)),1);
+phase_type_enlarge=ones(length(experiment.phase_type) + length(experiment.phase_type(2:2:end)),1);
 phase_type_enlarge(:) = nan;
-phase_type_enlarge(3:3:end,:)=char(phase_type(2:2:end,:));
+phase_type_enlarge(3:3:end,:)=char(experiment.phase_type(2:2:end,:));
 locations = any(isnan(phase_type_enlarge),2);
-phase_type_enlarge(locations) = ['b';char(phase_type(2:end-1));'b'];
+phase_type_enlarge(locations) = ['b';char(experiment.phase_type(2:end-1));'b'];
 phase_type_enlarge=char(phase_type_enlarge);
 
 phase_duration_enlarge=zeros(length(phase_type_enlarge),1);
-phase_duration_enlarge(any(phase_type_enlarge=='r',2))=phase_duration_r/2;
-phase_duration_enlarge(any(phase_type_enlarge=='l',2))=phase_duration_l/2;
-phase_duration_enlarge(any(phase_type_enlarge=='b',2))=phase_duration_b;
-phase_duration_enlarge(1)=phase_duration_start;
-phase_duration_enlarge(end)=phase_duration_stop;
+phase_duration_enlarge(any(phase_type_enlarge=='r',2))=experiment.phase_duration_r/2;
+phase_duration_enlarge(any(phase_type_enlarge=='l',2))=experiment.phase_duration_l/2;
+phase_duration_enlarge(any(phase_type_enlarge=='b',2))=experiment.phase_duration_b;
+phase_duration_enlarge(1)=experiment.phase_duration_start;
+phase_duration_enlarge(end)=experiment.phase_duration_stop;
 
 phase_duration_cumul_enlarge=zeros(length(phase_duration_enlarge),1);
 for i=1:length(phase_duration_enlarge)
@@ -103,10 +103,10 @@ locations = find(isnan(viapoint_l));
 viapoint_l(locations) = [pstep_3d_phase_l(1,:);pstep_3d_phase_l;];
 
 for k=4:3:size(viapoint_l,1)-3
-    viapoint_l(k+1,1)=min((viapoint_l(k,1)-viapoint_l(k-3,1))/(phase_duration_l/2),(-viapoint_l(k,1)+viapoint_l(k+3,1))/(phase_duration_l/2));
+    viapoint_l(k+1,1)=min((viapoint_l(k,1)-viapoint_l(k-3,1))/(experiment.phase_duration_l/2),(-viapoint_l(k,1)+viapoint_l(k+3,1))/(experiment.phase_duration_l/2));
 end
 for k=4:3:size(viapoint_l,1)-3
-    viapoint_l(k+1,2)=min((viapoint_l(k,2)-viapoint_l(k-3,2))/(phase_duration_l/2),(-viapoint_l(k,2)+viapoint_l(k+3,2))/(phase_duration_l/2));
+    viapoint_l(k+1,2)=min((viapoint_l(k,2)-viapoint_l(k-3,2))/(experiment.phase_duration_l/2),(-viapoint_l(k,2)+viapoint_l(k+3,2))/(experiment.phase_duration_l/2));
 end
 
 %
@@ -124,16 +124,16 @@ locations = find(isnan(viapoint_r));
 viapoint_r(locations) = [pstep_3d_phase_r(1,:);pstep_3d_phase_r;];
 
 for k=4:3:size(viapoint_r,1)-3
-    viapoint_r(k+1,1)=min((viapoint_r(k,1)-viapoint_r(k-3,1))/(phase_duration_r/2),(-viapoint_r(k,1)+viapoint_r(k+3,1))/(phase_duration_r/2));
+    viapoint_r(k+1,1)=min((viapoint_r(k,1)-viapoint_r(k-3,1))/(experiment.phase_duration_r/2),(-viapoint_r(k,1)+viapoint_r(k+3,1))/(experiment.phase_duration_r/2));
 end
 for k=4:3:size(viapoint_r,1)-3
-    viapoint_r(k+1,2)=min((viapoint_r(k,2)-viapoint_r(k-3,2))/(phase_duration_r/2),(-viapoint_r(k,2)+viapoint_r(k+3,2))/(phase_duration_r/2));
+    viapoint_r(k+1,2)=min((viapoint_r(k,2)-viapoint_r(k-3,2))/(experiment.phase_duration_r/2),(-viapoint_r(k,2)+viapoint_r(k+3,2))/(experiment.phase_duration_r/2));
 end
 
 %
 A_f_r=A_f*viapoint_r;
 %%
-% dt_time=zeros(length(phase_type_enlarge),size(A_f_l,1));
+% dt_time=zeros(length(experiment.phase_type_enlarge),size(A_f_l,1));
 % for i=1:size(dt_time,1)
 %     dt_time(i,(i-1)*6+1)=1;
 % end

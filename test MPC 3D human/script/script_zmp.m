@@ -1,23 +1,23 @@
 %% Results ZMP
 zz=[experiment.zfloor_ref(1);experiment.zfloor_ref(1:end-1)];
-zz(length(zc)+1:end)=[];
-xz=1*xc+0*xdc-(zc-zz)./(zddc+g).*xddc;
-yz=1*yc+0*ydc-(zc-zz)./(zddc+g).*yddc;
+zz(length(MPC_outputs_storage.zc)+1:end)=[];
+xz=1*MPC_outputs_storage.xc+0*MPC_outputs_storage.xdc-(MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g).*MPC_outputs_storage.xddc;
+yz=1*MPC_outputs_storage.yc+0*MPC_outputs_storage.ydc-(MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g).*MPC_outputs_storage.yddc;
 
 zz_up=zz;
-xz_up=[xz(1);1*xc(2:end)+0*xdc(2:end)-zeta_up_ref(1:length(zc)-1).*xddc(2:end)];
-yz_up=[yz(1);1*yc(2:end)+0*ydc(2:end)-zeta_up_ref(1:length(zc)-1).*yddc(2:end)];
+xz_up=[xz(1);1*MPC_outputs_storage.xc(2:end)+0*MPC_outputs_storage.xdc(2:end)-experiment.zeta_up_ref(1:length(MPC_outputs_storage.zc)-1).*MPC_outputs_storage.xddc(2:end)];
+yz_up=[yz(1);1*MPC_outputs_storage.yc(2:end)+0*MPC_outputs_storage.ydc(2:end)-experiment.zeta_up_ref(1:length(MPC_outputs_storage.zc)-1).*MPC_outputs_storage.yddc(2:end)];
 
 zz_down=zz;
-xz_down=1*xc+0*xdc-zeta_down_ref(1:length(zc)).*xddc;
-yz_down=1*yc+0*ydc-zeta_down_ref(1:length(zc)).*yddc;
+xz_down=1*MPC_outputs_storage.xc+0*MPC_outputs_storage.xdc-experiment.zeta_down_ref(1:length(MPC_outputs_storage.zc)).*MPC_outputs_storage.xddc;
+yz_down=1*MPC_outputs_storage.yc+0*MPC_outputs_storage.ydc-experiment.zeta_down_ref(1:length(MPC_outputs_storage.zc)).*MPC_outputs_storage.yddc;
 
 zcapture=zz;
-xcapture=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
-ycapture=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
+xcapture=MPC_outputs_storage.xc+((MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g)).^(1/2).*MPC_outputs_storage.xdc;
+ycapture=MPC_outputs_storage.yc+((MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g)).^(1/2).*MPC_outputs_storage.ydc;
 
-xdcm=xc+((zc-zz)./(zddc+g)).^(1/2).*xdc;
-ydcm=yc+((zc-zz)./(zddc+g)).^(1/2).*ydc;
-zdcm=zc+((zc-zz)./(zddc+g)).^(1/2).*zdc;
+xdcm=MPC_outputs_storage.xc+((MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g)).^(1/2).*MPC_outputs_storage.xdc;
+ydcm=MPC_outputs_storage.yc+((MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g)).^(1/2).*MPC_outputs_storage.ydc;
+zdcm=MPC_outputs_storage.zc+((MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g)).^(1/2).*MPC_outputs_storage.zdc;
 
-zeta=(zc-zz)./(zddc+g);
+zeta=(MPC_outputs_storage.zc-zz)./(MPC_outputs_storage.zddc+experiment.g);

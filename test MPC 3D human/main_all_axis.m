@@ -2,7 +2,10 @@ clear all
 
 clc
 
-addpath script/ function/ classdef/
+%addpath script/ 
+addpath function/ classdef/ 
+
+addpath core_MPC/classdef/ core_MPC/classdef/linear_trajectories/ core_MPC/function/ core_MPC/script/
 
 %%
 robot_type='human';
@@ -26,7 +29,7 @@ cop_ref_type='ankle_center';
 %'ankle_center' : polyhedron centered on the ankle
 %'foot_center' : polyhedron centered on the middle of the foot  
 
-polyhedron_type='waist_center';
+polyhedron_position='waist_center';
 %'ankle_center' : polyhedron centered on the ankle
 %'foot_center' : polyhedron centered on the middle of the foot
 %'waist_center' : polyhedron centered on the middle of the waist   
@@ -77,7 +80,7 @@ for i=1:experiment.phase_duration_iteration_cumul(end)
     
     %% linear MPC iteration
     MPC_outputs=function_MPC_iteration(MPC_inputs);
-    
+        
     %% Store MPC results
     MPC_outputs_storage.add_storage(MPC_outputs);
 
