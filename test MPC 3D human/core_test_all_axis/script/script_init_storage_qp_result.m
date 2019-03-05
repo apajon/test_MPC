@@ -1,21 +1,21 @@
 %% Initialize MPC storage of MPC iteration from QP result
-MPC_outputs_storage=classdef_quadratic_problem_outputs;
+MPC_outputs_storage=classdef_MPC_problem_outputs;
 
 % COM along x axis
-MPC_outputs_storage.xdddc_storage=[];
+MPC_outputs_storage.xc_control=[];
 
 MPC_outputs_storage.xc(1)=robot.xcom_0(1);
 MPC_outputs_storage.xdc(1)=robot.xcom_0(2);
 MPC_outputs_storage.xddc(1)=robot.xcom_0(3);
 
-MPC_outputs_storage.ydddc_storage=[];
+MPC_outputs_storage.yc_control=[];
 
 MPC_outputs_storage.yc(1)=robot.ycom_0(1);
 MPC_outputs_storage.ydc(1)=robot.ycom_0(2);
 MPC_outputs_storage.yddc(1)=robot.ycom_0(3);
 
 % COM along z axis
-MPC_outputs_storage.zdddc_storage=[];
+MPC_outputs_storage.zc_control=[];
 
 MPC_outputs_storage.zc(1)=robot.zcom_0(1);
 MPC_outputs_storage.zdc(1)=robot.zcom_0(2);

@@ -35,18 +35,26 @@ classdef classdef_create_robot<handle
     methods
         %%
         function obj=classdef_create_robot(robot_type)
-            switch robot_type
-                case 'hrp2'
-                    run('robot_description/hrp2.m')
-                case 'hrp4'
-                    run('robot_description/hrp4.m')
-                case 'human'
-                    run('robot_description/human.m')
-                otherwise
-                    msg='Bad choice of robot_type \n';
-                    errormsg=[msg];
-                    error(errormsg,[])   
+            robot_type_namefile=['config/robot_description/' robot_type '.m'];
+            if isfile(robot_type_namefile)
+                run(robot_type_namefile)
+            else
+                msg='Bad choice of robot_type \n';
+                errormsg=[msg];
+                error(errormsg,[])  
             end
+%             switch robot_type
+%                 case 'hrp2'
+%                     run('config/robot_description/hrp2.m')
+%                 case 'hrp4'
+%                     run('config/robot_description/hrp4.m')
+%                 case 'human'
+%                     run('config/robot_description/human.m')
+%                 otherwise
+%                     msg='Bad choice of robot_type \n';
+%                     errormsg=[msg];
+%                     error(errormsg,[])   
+%             end
             
             obj.h_com=h_com;
 

@@ -78,17 +78,17 @@ plot3(xcapture,ycapture,zcapture,'-*b')
 plot3(xdcm,ydcm,zdcm-robot.h_com*0+0.0,'-*b')
 hold off
 hold on;
-XY=drawing_rectangle_rotate(pstep,psi,robot.backtoankle,robot.fronttoankle,robot.exttoankle,robot.inttoankle,firstSS=='l');
+XY=drawing_rectangle_rotate(pstep,experiment.yaw,robot.backtoankle,robot.fronttoankle,robot.exttoankle,robot.inttoankle,firstSS=='r');
 for j=1:length(pstep)
     plot3(XY(j,1:5),XY(j,6:10),repmat(MPC_outputs_storage.zstep(j),1,5),'-k','LineWidth',2)
 end
 
-XY=drawing_rectangle_rotate(pstep,psi,robot.backtoankle-robot.sole_margin,robot.fronttoankle-robot.sole_margin,robot.exttoankle-robot.sole_margin,robot.inttoankle-robot.sole_margin,firstSS=='l');
+XY=drawing_rectangle_rotate(pstep,experiment.yaw,robot.backtoankle-robot.sole_margin,robot.fronttoankle-robot.sole_margin,robot.exttoankle-robot.sole_margin,robot.inttoankle-robot.sole_margin,firstSS=='r');
 for j=1:length(pstep)
     plot3(XY(j,1:5),XY(j,6:10),repmat(MPC_outputs_storage.zstep(j),1,5),':k','LineWidth',2)
 end
 
-XY=drawing_rectangle_rotate(pstep,psi,robot.backtoankle+4*robot.sole_margin,robot.fronttoankle+4*robot.sole_margin,robot.exttoankle+4*robot.sole_margin,robot.inttoankle+4*robot.sole_margin,firstSS=='l');
+XY=drawing_rectangle_rotate(pstep,psi,robot.backtoankle+4*robot.sole_margin,robot.fronttoankle+4*robot.sole_margin,robot.exttoankle+4*robot.sole_margin,robot.inttoankle+4*robot.sole_margin,firstSS=='r');
 for j=1:length(pstep)
     fill3(XY(j,1:5),XY(j,6:10),repmat(MPC_outputs_storage.zstep(j),1,5),[132,200,225]/255,'LineStyle','none')
 end
@@ -121,12 +121,12 @@ plot(xz(1:size(experiment.vcom_ref,1)-no_end),yz(1:size(experiment.vcom_ref,1)-n
 hold off
 
 hold on;
-XY=drawing_rectangle_rotate(pstep,psi,robot.backtoankle,robot.fronttoankle,robot.exttoankle,robot.inttoankle,firstSS=='l');
+XY=drawing_rectangle_rotate(pstep,experiment.yaw,robot.backtoankle,robot.fronttoankle,robot.exttoankle,robot.inttoankle,firstSS=='r');
 for j=1:length(pstep)
     plot(XY(j,1:5),XY(j,6:10),'-k','LineWidth',2)
 end
 
-XY=drawing_rectangle_rotate(pstep,psi,robot.backtoankle-robot.sole_margin,robot.fronttoankle-robot.sole_margin,robot.exttoankle-robot.sole_margin,robot.inttoankle-robot.sole_margin,firstSS=='l');
+XY=drawing_rectangle_rotate(pstep,experiment.yaw,robot.backtoankle-robot.sole_margin,robot.fronttoankle-robot.sole_margin,robot.exttoankle-robot.sole_margin,robot.inttoankle-robot.sole_margin,firstSS=='r');
 for j=1:length(pstep)
     plot(XY(j,1:5),XY(j,6:10),':k','LineWidth',2)
 end

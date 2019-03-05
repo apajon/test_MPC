@@ -37,11 +37,11 @@ for i=1:size(pstep,1)
     xv=[x x+w x+w x x];yv=[y y y+h y+h y];
     R=[xv;yv];
     if(i==1||i==2)
-        alpha=theta(i);
+        alpha=theta(1);
     elseif(i==length(pstep))
         alpha=theta(end);
     else
-        alpha=theta(3*(i-2)+1);
+        alpha=theta(i-1);
     end
     XY_=[cos(alpha) -sin(alpha);sin(alpha) cos(alpha)]*R;
     XY(i,:)=[XY_(1,:)+pstep(i,1) XY_(2,:)+pstep(i,2)];

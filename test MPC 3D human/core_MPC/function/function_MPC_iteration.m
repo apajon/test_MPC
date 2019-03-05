@@ -1,5 +1,7 @@
 function [MPC_outputs]=function_MPC_iteration(MPC_inputs)
 
+MPC_inputs.isFull();
+
 %% Initialization from last robot state
 run('script_initialize_from_current_state.m')
     

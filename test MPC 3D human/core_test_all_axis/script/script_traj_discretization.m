@@ -1,6 +1,6 @@
 %% discretization trajectories
 switch(COM_form)
-        case 'com jerk'
+        case 'comPolynomial'
             xc_discret=[MPC_outputs_storage.xc(1)];
             xdc_discret=[MPC_outputs_storage.xdc(1)];
             xddc_discret=[MPC_outputs_storage.xddc(1)];
@@ -12,7 +12,7 @@ switch(COM_form)
             zc_discret=[MPC_outputs_storage.zc(1)];
             zdc_discret=[MPC_outputs_storage.zdc(1)];
             zddc_discret=[MPC_outputs_storage.zddc(1)];
-            for i=1:size(MPC_outputs_storage.xdddc_storage,1)
+            for i=1:size(MPC_outputs_storage.xc_control,1)
                 t=[[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]' [(1/frequency:1/frequency:experiment.phase_duration_sampling(i)).^2./2]'];
                 t=[ones(size(t,1),1) t];
                 dt=[zeros(size(t,1),1) ones(size(t,1),1) [1/frequency:1/frequency:experiment.phase_duration_sampling(i)]'];
@@ -20,19 +20,19 @@ switch(COM_form)
                 dddt=[(1/frequency:1/frequency:experiment.phase_duration_sampling(i))]';
                 
                 
-                xc_discret=[xc_discret;t*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt.^3/6*MPC_outputs_storage.xdddc_storage(i)];
-                xdc_discret=[xdc_discret;dt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt.^2/2*MPC_outputs_storage.xdddc_storage(i)];
-                xddc_discret=[xddc_discret;ddt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt*MPC_outputs_storage.xdddc_storage(i)];
+                xc_discret=[xc_discret;t*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt.^3/6*MPC_outputs_storage.xc_control(i)];
+                xdc_discret=[xdc_discret;dt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt.^2/2*MPC_outputs_storage.xc_control(i)];
+                xddc_discret=[xddc_discret;ddt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt*MPC_outputs_storage.xc_control(i)];
 
-                yc_discret=[yc_discret;t*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt.^3/6*MPC_outputs_storage.ydddc_storage(i)];
-                ydc_discret=[ydc_discret;dt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt.^2/2*MPC_outputs_storage.ydddc_storage(i)];
-                yddc_discret=[yddc_discret;ddt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt*MPC_outputs_storage.ydddc_storage(i)];
+                yc_discret=[yc_discret;t*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt.^3/6*MPC_outputs_storage.yc_control(i)];
+                ydc_discret=[ydc_discret;dt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt.^2/2*MPC_outputs_storage.yc_control(i)];
+                yddc_discret=[yddc_discret;ddt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt*MPC_outputs_storage.yc_control(i)];
 
-                zc_discret=[zc_discret;t*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt.^3/6*MPC_outputs_storage.zdddc_storage(i)];
-                zdc_discret=[zdc_discret;dt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt.^2/2*MPC_outputs_storage.zdddc_storage(i)];
-                zddc_discret=[zddc_discret;ddt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt*MPC_outputs_storage.zdddc_storage(i)];
+                zc_discret=[zc_discret;t*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt.^3/6*MPC_outputs_storage.zc_control(i)];
+                zdc_discret=[zdc_discret;dt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt.^2/2*MPC_outputs_storage.zc_control(i)];
+                zddc_discret=[zddc_discret;ddt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt*MPC_outputs_storage.zc_control(i)];
             end
-        case 'poly expo'
+        case 'comPolyExpo'
             xc_discret=[MPC_outputs_storage.xc(1)];
             xdc_discret=[MPC_outputs_storage.xdc(1)];
             xddc_discret=[MPC_outputs_storage.xddc(1)];
@@ -44,7 +44,7 @@ switch(COM_form)
             zc_discret=[MPC_outputs_storage.zc(1)];
             zdc_discret=[MPC_outputs_storage.zdc(1)];
             zddc_discret=[MPC_outputs_storage.zddc(1)];
-            for i=1:size(MPC_outputs_storage.xdddc_storage,1)
+            for i=1:size(MPC_outputs_storage.xc_control,1)
                 et=exp(-experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]');
                 
                 t=[1/2*(et.^2-4*et+3)*experiment.omega_temp^-1 1/2*(et-1).^2*experiment.omega_temp^-2];
@@ -54,19 +54,19 @@ switch(COM_form)
                 dddt=repmat((et.^-1-1),1,3).*[(et-1).^2 (1-et).*(2*et+1)*experiment.omega_temp (4*et.^2+et+1)*experiment.omega_temp^2];
 
             
-                xc_discret=[xc_discret;t*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,1)*MPC_outputs_storage.xdddc_storage(i)];
-                xdc_discret=[xdc_discret;dt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,2)*MPC_outputs_storage.xdddc_storage(i)];
-                xddc_discret=[xddc_discret;ddt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,3)*MPC_outputs_storage.xdddc_storage(i)];
+                xc_discret=[xc_discret;t*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,1)*MPC_outputs_storage.xc_control(i)];
+                xdc_discret=[xdc_discret;dt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,2)*MPC_outputs_storage.xc_control(i)];
+                xddc_discret=[xddc_discret;ddt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,3)*MPC_outputs_storage.xc_control(i)];
 
-                yc_discret=[yc_discret;t*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,1)*MPC_outputs_storage.ydddc_storage(i)];
-                ydc_discret=[ydc_discret;dt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,2)*MPC_outputs_storage.ydddc_storage(i)];
-                yddc_discret=[yddc_discret;ddt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,3)*MPC_outputs_storage.ydddc_storage(i)];
+                yc_discret=[yc_discret;t*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,1)*MPC_outputs_storage.yc_control(i)];
+                ydc_discret=[ydc_discret;dt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,2)*MPC_outputs_storage.yc_control(i)];
+                yddc_discret=[yddc_discret;ddt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,3)*MPC_outputs_storage.yc_control(i)];
 
-                zc_discret=[zc_discret;t*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,1)*MPC_outputs_storage.zdddc_storage(i)];
-                zdc_discret=[zdc_discret;dt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,2)*MPC_outputs_storage.zdddc_storage(i)];
-                zddc_discret=[zddc_discret;ddt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,3)*MPC_outputs_storage.zdddc_storage(i)];
+                zc_discret=[zc_discret;t*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,1)*MPC_outputs_storage.zc_control(i)];
+                zdc_discret=[zdc_discret;dt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,2)*MPC_outputs_storage.zc_control(i)];
+                zddc_discret=[zddc_discret;ddt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,3)*MPC_outputs_storage.zc_control(i)];
             end
-        case 'zmp vel'
+        case 'comExponential'
             xc_discret=[MPC_outputs_storage.xc(1)];
             xdc_discret=[MPC_outputs_storage.xdc(1)];
             xddc_discret=[MPC_outputs_storage.xddc(1)];
@@ -78,7 +78,7 @@ switch(COM_form)
             zc_discret=[MPC_outputs_storage.zc(1)];
             zdc_discret=[MPC_outputs_storage.zdc(1)];
             zddc_discret=[MPC_outputs_storage.zddc(1)];
-            for i=1:size(MPC_outputs_storage.xdddc_storage,1)
+            for i=1:size(MPC_outputs_storage.xc_control,1)
                 t=[sinh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]')/experiment.omega_temp (cosh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]')-1)/experiment.omega_temp^2];
                 t=[ones(size(t,1),1) t];            
                 dt=[zeros(size(t,1),1) cosh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]') sinh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]')/experiment.omega_temp];
@@ -86,17 +86,17 @@ switch(COM_form)
                 dddt=[-sinh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]')/experiment.omega_temp+[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]' -cosh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]')+1 -experiment.omega_temp*sinh(experiment.omega_temp*[1/frequency:1/frequency:experiment.phase_duration_sampling(i)]')];
 
             
-                xc_discret=[xc_discret;t*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,1)*MPC_outputs_storage.xdddc_storage(i)];
-                xdc_discret=[xdc_discret;dt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,2)*MPC_outputs_storage.xdddc_storage(i)];
-                xddc_discret=[xddc_discret;ddt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,3)*MPC_outputs_storage.xdddc_storage(i)];
+                xc_discret=[xc_discret;t*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,1)*MPC_outputs_storage.xc_control(i)];
+                xdc_discret=[xdc_discret;dt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,2)*MPC_outputs_storage.xc_control(i)];
+                xddc_discret=[xddc_discret;ddt*[MPC_outputs_storage.xc(i);MPC_outputs_storage.xdc(i);MPC_outputs_storage.xddc(i)]+dddt(:,3)*MPC_outputs_storage.xc_control(i)];
 
-                yc_discret=[yc_discret;t*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,1)*MPC_outputs_storage.ydddc_storage(i)];
-                ydc_discret=[ydc_discret;dt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,2)*MPC_outputs_storage.ydddc_storage(i)];
-                yddc_discret=[yddc_discret;ddt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,3)*MPC_outputs_storage.ydddc_storage(i)];
+                yc_discret=[yc_discret;t*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,1)*MPC_outputs_storage.yc_control(i)];
+                ydc_discret=[ydc_discret;dt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,2)*MPC_outputs_storage.yc_control(i)];
+                yddc_discret=[yddc_discret;ddt*[MPC_outputs_storage.yc(i);MPC_outputs_storage.ydc(i);MPC_outputs_storage.yddc(i)]+dddt(:,3)*MPC_outputs_storage.yc_control(i)];
 
-                zc_discret=[zc_discret;t*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,1)*MPC_outputs_storage.zdddc_storage(i)];
-                zdc_discret=[zdc_discret;dt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,2)*MPC_outputs_storage.zdddc_storage(i)];
-                zddc_discret=[zddc_discret;ddt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,3)*MPC_outputs_storage.zdddc_storage(i)];
+                zc_discret=[zc_discret;t*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,1)*MPC_outputs_storage.zc_control(i)];
+                zdc_discret=[zdc_discret;dt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,2)*MPC_outputs_storage.zc_control(i)];
+                zddc_discret=[zddc_discret;ddt*[MPC_outputs_storage.zc(i);MPC_outputs_storage.zdc(i);MPC_outputs_storage.zddc(i)]+dddt(:,3)*MPC_outputs_storage.zc_control(i)];
             end
         otherwise
             error('Bad COM_form')

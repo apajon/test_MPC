@@ -3,7 +3,7 @@ clear all
 clc
 
 %addpath script/ 
-addpath function/ classdef/ 
+addpath core_test_all_axis/function/ core_test_all_axis/classdef/ 
 
 addpath core_MPC/classdef/ core_MPC/classdef/linear_trajectories/ core_MPC/function/ core_MPC/script/
 
@@ -39,10 +39,10 @@ kinematic_limit='hexagonTranslation';
 %'hexagon' : hexagon kinematic limits
 %'hexagonTranslation' : hexagon kinematic limits with translation
 
-COM_form='poly expo' 
-%'com jerk' : COM with piece-wise jerk
-%'zmp vel' : ZMP with piece-wise velocity
-%'poly expo' : 2nd poly of exponential
+COM_form='comPolyExpo';
+%'comPolynomial' : COM with piece-wise jerk
+%'comExponential' : ZMP with piece-wise velocity
+%'comPolyExpo' : COM with polynomial of exponential
 
 %b = both feet; r = right foot; l = left foot
 nb_foot_step=4;
@@ -53,10 +53,10 @@ save_figure=false;
 movie_record=false;
 
 %% Constant
-run('script/script_constant.m')
+run('core_test_all_axis/script/script_constant.m')
 
 %% Init storage QP result
-run('script/script_init_storage_qp_result.m')
+run('core_test_all_axis/script/script_init_storage_qp_result.m')
 
 %% movie record
 if movie_record  
@@ -73,20 +73,32 @@ end
 %% Optimization problem QP
 % Sampling update
 tic
-for i=1:experiment.phase_duration_iteration_cumul(end)
+for k=1:experiment.phase_duration_iteration_cumul(end)
     %% creation of inputs of a MPC iteration 
-    MPC_inputs=classdef_quadratic_problem_inputs;
-    run('script/script_problem_iteration_creation.m')
+%     MPC_inputs=classdef_MPC_problem_inputs;
+    MPC_inputs=function_fill_MPC_inputs(robot,experiment,MPC_outputs_storage,...
+        COM_form,kinematic_limit,cop_ref_type,firstSS,...
+        k);
+%     run('script/script_problem_iteration_creation.m')
     
     %% linear MPC iteration
-    MPC_outputs=function_MPC_iteration(MPC_inputs);
+    MPC_outputs=classdef_MPC_problem_outputs;
+    
+    problem_building_filename=[...
+        "script_initialize_from_current_state.m";...% Initialization from last robot state
+        "script_update_cost.m";...% Cost
+        "script_cons_ineq.m";...% Constraint Equalities
+        "script_cons_eq.m"...% Constraint Inequalities
+        ];
+    
+    MPC_outputs.MPC_iteration(MPC_inputs,problem_building_filename);
         
     %% Store MPC results
     MPC_outputs_storage.add_storage(MPC_outputs);
 
     %%
 %     run('script/script_display_online.m')
-    run('script/script_movie_record.m')
+    run('core_test_all_axis/script/script_movie_record.m')
 end
 toc
 
@@ -96,27 +108,27 @@ if movie_record
 end
 
 %% Results ZMP
-run('script/script_zmp.m')
+run('core_test_all_axis/script/script_zmp.m')
 
 %% foot traj in the air
 % hstep_move=0.05;
 hstep_move=0.2;
-run('script/script_foot_traj_air.m')
+run('core_test_all_axis/script/script_foot_traj_air.m')
 % run('script/script_foot_traj_air_stairs.m')
 
 %% discretization trajectories
-run('script/script_traj_discretization.m')
+run('core_test_all_axis/script/script_traj_discretization.m')
 
 %% 
 dt_type_phase_=any(phase_type_sampling_enlarge=='l',2)*1+any(phase_type_sampling_enlarge=='r',2)*2;
 dt_type_phase_=[0;dt_type_phase_];
 
 %% Plot results
-run('script/script_plot_results.m')
+run('core_test_all_axis/script/script_plot_results.m')
     
 %% write txt
 if false  
-    run('script/script_write_txt.m')
+    run('core_test_all_axis/script/script_write_txt.m')
 end
 %%
 if save_figure

@@ -1,7 +1,7 @@
-classdef classdef_quadratic_problem_inputs<handle
+classdef classdef_MPC_problem_inputs<handle
     properties
         g %gravity acceleration constant
-        omega_temp
+        omega_temp %temporary value of omega
         
         N %number of sample of the preview window
         phase_duration_sampling %duration of each sample of the preview window
@@ -16,6 +16,8 @@ classdef classdef_quadratic_problem_inputs<handle
         dc_ref %reference value of CoM velocity during each sample of the preview window with column along axis [x y]
         
         Px_step %Px matrix of support foot for the preview window
+        
+        yaw
         
         no_double_support
         no_double_support_capture
@@ -63,6 +65,8 @@ classdef classdef_quadratic_problem_inputs<handle
         ystep
         zstep
         
+        nbKnownSteps
+        
         step_number_pankle_fixed
         %vector of fixed step position on floor [#step x_step y_step; ...]
         %if coordinate is NaN, the position along this axis is still free
@@ -75,8 +79,24 @@ classdef classdef_quadratic_problem_inputs<handle
     end
     
     methods
-        function obj=classdef_quadratic_problem_inputs()
+        function obj=classdef_MPC_problem_inputs()
             %empty constructor
+        end
+        %%
+        function [full]=isFull(obj)
+            %check if all properties of obj are fulfilled
+            %if yes return true
+            %if no return error with the empty property
+            inputs_properties=properties(obj);
+            for h=1:size(inputs_properties,1)
+                if isempty(obj.([inputs_properties{h}]))
+                    msg='Error in inputs construction \n';
+                    msg1=['inputs.' inputs_properties{h} ' is empty \n'];
+                    errormsg=[msg msg1];
+                    error(errormsg,[])
+                end
+            end
+            full=true;
         end
     end
 end

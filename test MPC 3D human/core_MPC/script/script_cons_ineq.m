@@ -7,7 +7,8 @@
     CoP_state_preview.f_z_up(:,1),CoP_state_preview.f_z_down(:,1),Step_state_preview.f_step(:,1),...
     CoP_state_preview.f_z_up(:,2),CoP_state_preview.f_z_down(:,2),Step_state_preview.f_step(:,2),...
     MPC_inputs.no_double_support,MPC_inputs.double_support,MPC_inputs.right_support,MPC_inputs.left_support,...
-    MPC_inputs.fronttoankle,MPC_inputs.backtoankle,MPC_inputs.inttoankle,MPC_inputs.exttoankle,MPC_inputs.sole_margin);
+    MPC_inputs.fronttoankle,MPC_inputs.backtoankle,MPC_inputs.inttoankle,MPC_inputs.exttoankle,MPC_inputs.sole_margin,...
+    MPC_inputs.yaw);
         
     %% Constraint foot step stretching
     [A_step_stretch,b_step_stretch]=function_constraint_foot_stretching(MPC_inputs,Step_state_preview,MPC_inputs.xstep,MPC_inputs.ystep);
@@ -92,20 +93,22 @@
     end
         
     switch(MPC_inputs.COM_form)
-        case {'com jerk','zmp vel'}
+        case {'comPolynomial','comExponential'}
                 [A_Capture,b_Capture]=function_constraint_convexhull(...
                     COM_state_preview.Pu_c+COM_state_preview.Pu_dc/MPC_inputs.omega_temp,COM_state_preview.Pu_c+COM_state_preview.Pu_dc/MPC_inputs.omega_temp,Step_state_preview.Pu_step,...
                     COM_state_preview.f_c(:,1)+COM_state_preview.f_dc(:,1)/MPC_inputs.omega_temp,COM_state_preview.f_c(:,1)+COM_state_preview.f_dc(:,1)/MPC_inputs.omega_temp,Step_state_preview.f_step(:,1),...
                     COM_state_preview.f_c(:,2)+COM_state_preview.f_dc(:,2)/MPC_inputs.omega_temp,COM_state_preview.f_c(:,2)+COM_state_preview.f_dc(:,2)/MPC_inputs.omega_temp,Step_state_preview.f_step(:,2),...
                     MPC_inputs.no_double_support_capture,[],MPC_inputs.right_support,MPC_inputs.left_support,...
-                    MPC_inputs.fronttoankle,MPC_inputs.backtoankle,MPC_inputs.inttoankle,MPC_inputs.exttoankle,MPC_inputs.sole_margin);
-        case 'poly expo'
+                    MPC_inputs.fronttoankle,MPC_inputs.backtoankle,MPC_inputs.inttoankle,MPC_inputs.exttoankle,MPC_inputs.sole_margin,...
+                    MPC_inputs.yaw);
+        case 'comPolyExpo'
                 [A_Capture,b_Capture]=function_constraint_convexhull(...
                     COM_state_preview.Pu_c+3/2*COM_state_preview.Pu_dc/MPC_inputs.omega_temp+1/2*COM_state_preview.Pu_ddc/MPC_inputs.omega_temp^2,COM_state_preview.Pu_c+3/2*COM_state_preview.Pu_dc/MPC_inputs.omega_temp+1/2*COM_state_preview.Pu_ddc/MPC_inputs.omega_temp^2,Step_state_preview.Pu_step,...
                     COM_state_preview.f_c(:,1)+3/2*COM_state_preview.f_dc(:,1)/MPC_inputs.omega_temp+1/2*COM_state_preview.f_ddc(:,1)/MPC_inputs.omega_temp^2,COM_state_preview.f_c(:,1)+3/2*COM_state_preview.f_dc(:,1)/MPC_inputs.omega_temp+1/2*COM_state_preview.f_ddc(:,1)/MPC_inputs.omega_temp^2,Step_state_preview.f_step(:,1),...
                     COM_state_preview.f_c(:,2)+3/2*COM_state_preview.f_dc(:,2)/MPC_inputs.omega_temp+1/2*COM_state_preview.f_ddc(:,2)/MPC_inputs.omega_temp^2,COM_state_preview.f_c(:,2)+3/2*COM_state_preview.f_dc(:,2)/MPC_inputs.omega_temp+1/2*COM_state_preview.f_ddc(:,2)/MPC_inputs.omega_temp^2,Step_state_preview.f_step(:,2),...
                     MPC_inputs.no_double_support_capture,[],MPC_inputs.right_support,MPC_inputs.left_support,...
-                    MPC_inputs.fronttoankle,MPC_inputs.backtoankle,MPC_inputs.inttoankle,MPC_inputs.exttoankle,MPC_inputs.sole_margin);
+                    MPC_inputs.fronttoankle,MPC_inputs.backtoankle,MPC_inputs.inttoankle,MPC_inputs.exttoankle,MPC_inputs.sole_margin,...
+                    MPC_inputs.yaw);
         otherwise
             error('Bad COM_form')
     end
@@ -136,7 +139,7 @@
     
     
     switch(MPC_inputs.COM_form)
-        case {'com jerk','zmp vel'}
+        case {'comPolynomial','comExponential'}
             switch MPC_inputs.kinematic_limit
                 case ''
                     [A_diff_capture_p,b_diff_capture_p]=function_constraint_polyhedron(...
@@ -163,7 +166,7 @@
                 otherwise
                     error('choose a type of kinematic_limit')
             end
-        case 'poly expo'
+        case 'comPolyExpo'
                 switch MPC_inputs.kinematic_limit
                     case ''
                         [A_diff_capture_p,b_diff_capture_p]=function_constraint_polyhedron(...
@@ -205,7 +208,7 @@
     
 %% Constraint vertical com motion on horizon
     switch(MPC_inputs.COM_form)
-        case {'com jerk','zmp vel'}
+        case {'comPolynomial','comExponential'}
             A_verti_motion_up_horizon=COM_state_preview.Pu_c(end,:)+COM_state_preview.Pu_dc(end,:)/MPC_inputs.omega_temp;
             b_verti_motion_up_horizon=MPC_inputs.zeta_up(end,:).*MPC_inputs.g+MPC_inputs.zfloor_ref_reduce(end,:)-(COM_state_preview.f_c(end,3)+COM_state_preview.f_dc(end,3)/MPC_inputs.omega_temp);
 
@@ -214,7 +217,7 @@
 
             A_verti_motion_horizon=[A_verti_motion_up_horizon;-A_verti_motion_down_horizon];
             b_verti_motion_horizon=[b_verti_motion_up_horizon;-b_verti_motion_down_horizon];        
-        case 'poly expo'
+        case 'comPolyExpo'
             A_verti_motion_up_horizon=COM_state_preview.Pu_c(end,:)+3/2*COM_state_preview.Pu_dc(end,:)/MPC_inputs.omega_temp+1/2*COM_state_preview.Pu_ddc(end,:)/MPC_inputs.omega_temp^2;
             b_verti_motion_up_horizon=MPC_inputs.zeta_up(end,:).*MPC_inputs.g+MPC_inputs.zfloor_ref_reduce(end,:)-(COM_state_preview.f_c(end,3)+3/2*COM_state_preview.f_dc(end,3)/MPC_inputs.omega_temp+1/2*COM_state_preview.f_ddc(end,3)/MPC_inputs.omega_temp^2);
 

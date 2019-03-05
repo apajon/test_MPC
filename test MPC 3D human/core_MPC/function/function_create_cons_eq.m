@@ -1,10 +1,11 @@
+function [Aeq,beq]=function_create_cons_eq(MPC_inputs,COM_state_preview,Step_state_preview)
 %% Constraints Equalities
     %TODO orientation
 Aeq=[];beq=[];
 
 %%
 switch(MPC_inputs.COM_form)
-    case {'comPolyExpo'}
+    case {'poly expo'}
     otherwise
         % zeta_final=(zeta_up_ref(i+16)+zeta_down_ref(i+16))/2;
         % zeta_final=h_com/g;
@@ -21,7 +22,8 @@ switch(MPC_inputs.COM_form)
 end
 
 %% Manage fixed foot step position
-[A_fixed_step,b_fixed_step]=pankle_fixed_path(MPC_inputs.nbKnownSteps,MPC_inputs.N,size(Step_state_preview.Pu_step,2),MPC_inputs.step_number_pankle_fixed);
+[A_fixed_step,b_fixed_step]=pankle_fixed_path(size(MPC_inputs.xstep,1),MPC_inputs.N,size(Step_state_preview.Pu_step,2),MPC_inputs.step_number_pankle_fixed);
 
 Aeq=[Aeq;A_fixed_step];
 beq=[beq;b_fixed_step];
+end

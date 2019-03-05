@@ -1,5 +1,24 @@
+%Compute the Cost function to minimize by the optimization solver
+%The problem is: min(QP_result_all)
+%COM trajectory control variable
+%+distance between COM velocity and a velocity reference
+%+distance between CoP_mean and a position reference
+%+distance between COM vertical position and a height reference
+%
+%As any trajectory can be written in a linear way with QP_result_all, the
+%problem is written as a quadratic problem and solve with a Qp
+%
+%As the problem is decoupled along each axis:
+%QP_result_all is build as [X;Y;Z] where X, Y and Z are the vector of
+%control variable along respectively, x, y and z-axis.
+%X is build as [Xc;Xstep] where Xc is a vector of COM control variable
+%along the preview window and Xstep is a vector of foot step position
+%along the preview window
+%Y is build as X
+%Z is only a vector of COM control variable along the preview window
+
 %%
-%min COM traj control input
+%min COM traj control variable
 Cost_minCOM_control=classdef_CostPart(eye(MPC_inputs.N),[],zeros(MPC_inputs.N,1),0);
 
 % min com vel to ref

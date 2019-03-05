@@ -45,6 +45,11 @@ classdef classdef_create_experiment<handle
         phase_type_decouple
         
         %%
+        yaw
+        
+        yaw_sampling
+        
+        %%
         Px_step_ref
         
         plan_hexagon
@@ -83,7 +88,7 @@ classdef classdef_create_experiment<handle
         function obj=classdef_create_experiment()
             %empty creator
         end
-        
+        %%
         function obj=classdef_create_experiment_test(obj,phase_duration_type,...
                 nb_foot_step,firstSS,...
                 kinematic_limit,robot,polyhedron_position,...
@@ -101,7 +106,7 @@ classdef classdef_create_experiment<handle
             
             obj.generate_phase_sampling();
             
-            obj.generate_phase_decoupling();
+            obj.generate_phase_decoupling(firstSS);
             
             %% ref
             obj.generate_kinematic_limit(kinematic_limit,robot,polyhedron_position);
@@ -113,7 +118,7 @@ classdef classdef_create_experiment<handle
         %%
         function obj=generate_phase_duration(obj,phase_duration_type)
             %% Phase duration
-            phase_duration_type_namefile=['phase_duration/' phase_duration_type '.m'];
+            phase_duration_type_namefile=['config/phase_duration/' phase_duration_type '.m'];
             if isfile(phase_duration_type_namefile)
                 run(phase_duration_type_namefile)
             else
@@ -252,7 +257,7 @@ classdef classdef_create_experiment<handle
 
             % phase_type_sampling=[phase_type_sampling(2:end);phase_type_sampling(end)];
         end
-        function obj=generate_phase_decoupling(obj)
+        function obj=generate_phase_decoupling(obj,firstSS)
             %% phase decoupling
             obj.phase_sampling_length=[1;cumsum(obj.phase_duration_iteration(1:end-1))+1];
             % obj.phase_sampling_length=[1;cumsum(phase_duration_iteration(1:end-1))];
@@ -285,6 +290,29 @@ classdef classdef_create_experiment<handle
             end
             
             obj.Px_step_ref=Px_step_ref_;
+            
+            yaw_=0;
+            for k=3:size(Px_step_ref_,2)-2*(obj.phase_type(end)=='stop')
+                if firstSS=='r'
+                    yaw_(k-1,1)=(-1)^mod(k+1,2)*0.1745;
+                elseif firstSS=='l'
+                    yaw_(k-1,1)=(-1)^mod(k-1,2)*0.1745;
+                else
+                    error('Bad choice of firstSS')
+                end
+            end
+            if obj.phase_type(end)=='stop'
+                yaw_(end+1)=0;
+            end
+            obj.yaw=yaw_;
+            
+            switch obj.phase_type(end)
+                case 'stop'
+                    yaw_sampling_=(Px_step_ref_(:,2:end-1)~=0)*yaw_;
+                otherwise
+                    yaw_sampling_=(Px_step_ref_(:,2:end)~=0)*yaw_;
+            end
+            obj.yaw_sampling=yaw_sampling_;
         end
         function obj=generate_kinematic_limit(obj,kinematic_limit,robot,polyhedron_position)
             %% Polyhedron limits

@@ -1,18 +1,23 @@
+function [MPC_inputs]=function_fill_MPC_inputs(robot,experiment,MPC_outputs_storage,...
+    COM_form,kinematic_limit,cop_ref_type,firstSS,...
+    k)
+
+MPC_inputs=classdef_MPC_problem_inputs();
 %%
-i
-if i>=48
-    i
+k
+if k>=48
+    k
 end
 
 N=1;
-t=experiment.phase_duration_sampling(i);
+t=experiment.phase_duration_sampling(k);
 while(t<experiment.preview_windows_duration)
-    t=t+experiment.phase_duration_sampling(i+N);
+    t=t+experiment.phase_duration_sampling(k+N);
     N=N+1;
 end
 
-preview_windows=1+(i-1):N+(i-1);
-%     preview_windows=1+(i):N+(i);
+preview_windows=1+(k-1):N+(k-1);
+%     preview_windows=1+(k):N+(k);
 
 %%
 MPC_inputs.g=experiment.g;
@@ -26,9 +31,9 @@ MPC_inputs.zeta_temp=ones(N,1)*experiment.zeta_temp;
 MPC_inputs.zeta_up=experiment.zeta_up_ref(preview_windows,:);
 MPC_inputs.zeta_down=experiment.zeta_down_ref(preview_windows,:);
 
-MPC_inputs.c_init=[MPC_outputs_storage.xc(i) MPC_outputs_storage.yc(i) MPC_outputs_storage.zc(i);...
-                MPC_outputs_storage.xdc(i) MPC_outputs_storage.ydc(i) MPC_outputs_storage.zdc(i);...
-                MPC_outputs_storage.xddc(i) MPC_outputs_storage.yddc(i) MPC_outputs_storage.zddc(i)];
+MPC_inputs.c_init=[MPC_outputs_storage.xc(k) MPC_outputs_storage.yc(k) MPC_outputs_storage.zc(k);...
+                MPC_outputs_storage.xdc(k) MPC_outputs_storage.ydc(k) MPC_outputs_storage.zdc(k);...
+                MPC_outputs_storage.xddc(k) MPC_outputs_storage.yddc(k) MPC_outputs_storage.zddc(k)];
             
 MPC_inputs.dc_ref=[experiment.vcom_ref(preview_windows,1) experiment.vcom_ref(preview_windows,2)];
 
@@ -63,9 +68,20 @@ MPC_inputs.xankmin=robot.xankmin;
 MPC_inputs.yankmax=robot.yankmax;
 MPC_inputs.yankmin=robot.yankmin;
 
-MPC_inputs.xstep=MPC_outputs_storage.xstep;
-MPC_inputs.ystep=MPC_outputs_storage.ystep;
-MPC_inputs.zstep=MPC_outputs_storage.zstep;
+if MPC_inputs.phase_type_reduce(1)=='b' || MPC_inputs.phase_type_reduce(1)=="start" || MPC_inputs.phase_type_reduce(1)=="stop"
+    MPC_inputs.xstep=MPC_outputs_storage.xstep(end-1:end,1);
+    MPC_inputs.ystep=MPC_outputs_storage.ystep(end-1:end,1);
+    MPC_inputs.zstep=MPC_outputs_storage.zstep(end-1:end,1);
+else
+    MPC_inputs.xstep=MPC_outputs_storage.xstep(end,1);
+    MPC_inputs.ystep=MPC_outputs_storage.ystep(end,1);
+    MPC_inputs.zstep=MPC_outputs_storage.zstep(end,1);
+end
+% MPC_inputs.xstep=MPC_outputs_storage.xstep;
+% MPC_inputs.ystep=MPC_outputs_storage.ystep;
+% MPC_inputs.zstep=MPC_outputs_storage.zstep;
+
+MPC_inputs.nbKnownSteps=size(MPC_outputs_storage.xstep,1);
 
 if isempty(experiment.step_number_pankle_fixed)
     MPC_inputs.step_number_pankle_fixed=[0 MPC_outputs_storage.xstep(2) MPC_outputs_storage.ystep(2)];
@@ -78,6 +94,8 @@ MPC_inputs.zfloor_ref_reduce=experiment.zfloor_ref(preview_windows,:);
 MPC_inputs.hcom_ref_max_reduce=experiment.hcom_ref_max(preview_windows,:);
 
 MPC_inputs.no_end_constraint=size(experiment.vcom_ref,1)-39;
+
+MPC_inputs.yaw=experiment.yaw_sampling(preview_windows,:);
 
 %% experiment.zfloor_ref from ankle position to CoP reference along axis [x y]
 switch(cop_ref_type)
@@ -123,10 +141,10 @@ elseif firstSS=='l'
     end
 end
 
-if i>1 && (MPC_inputs.phase_type_sampling(1)=='b'|MPC_inputs.phase_type_sampling(1)=="start"|MPC_inputs.phase_type_sampling(1)=="stop")
-    if experiment.phase_type_sampling(i-1)=='r'
+if k>1 && (MPC_inputs.phase_type_sampling(1)=='b'|MPC_inputs.phase_type_sampling(1)=="start"|MPC_inputs.phase_type_sampling(1)=="stop")
+    if experiment.phase_type_sampling(k-1)=='r'
         right_support(1)=true;
-    elseif experiment.phase_type_sampling(i-1)=='l'
+    elseif experiment.phase_type_sampling(k-1)=='l'
         left_support(1)=true;
     end
 end
@@ -134,7 +152,7 @@ end
 MPC_inputs.right_support=right_support;
 MPC_inputs.left_support=left_support;
 
-if any(experiment.Px_step_ref(1+(i-1),1:2:end)==0.5,2)||any(experiment.Px_step_ref(N+(i-1),1:2:end)==0.5,2)
+if any(experiment.Px_step_ref(1+(k-1),1:2:end)==0.5,2)||any(experiment.Px_step_ref(N+(k-1),1:2:end)==0.5,2)
     double_support=any(experiment.Px_step_ref(preview_windows,1:2:end)==0.5,2);
 else
     double_support=false;
@@ -148,16 +166,4 @@ no_double_support_capture(1:end-1,:)=[no_double_support_capture(1:end-1,:)==2];
 
 MPC_inputs.no_double_support_capture=no_double_support_capture;
 
-clear left_support right_support double_support no_double_support_capture
-
-%%
-inputs_properties=properties(MPC_inputs);
-for k=1:size(inputs_properties,1)
-    if isempty(MPC_inputs.([inputs_properties{k}]))
-        msg='Error in inputs construction \n';
-        msg1=['inputs.' inputs_properties{k} ' is empty \n'];
-        errormsg=[msg msg1];
-        error(errormsg,[])
-    end
 end
-clear inputs_properties preview_windows N k t
